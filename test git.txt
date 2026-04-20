@@ -1,1 +1,3 @@
 xin chào
+
+dòng edit đầu tiền ở brand edit_file_test
