@@ -3,3 +3,5 @@ xin chào
 dòng edit đầu tiền ở brand edit_file_test
 
 đây là edit từ nhánh main
+
+test conflict from branch
