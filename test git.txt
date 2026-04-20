@@ -3,3 +3,5 @@ xin chào
 dòng edit đầu tiền ở brand edit_file_test
 
 đây là edit từ nhánh main
+
+1. đoạn code được edit ở main để test merge về branch
