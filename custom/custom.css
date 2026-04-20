@@ -1,0 +1,9 @@
+.im-shared-resource__icons svg {
+  width: 16px !important;
+  height: 16px !important;
+  gap: 4px;
+}
+
+.im-shared-resource__user-label {
+  font-size: 12px;
+}

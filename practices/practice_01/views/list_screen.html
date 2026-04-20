@@ -1,0 +1,285 @@
+<html>
+<imart type="head">
+  <title>Practice 01 ZZZ</title>
+  <imart type="imuiLink" href="ui/css/imui.css" />
+  <imart type="imuiScript" src="ui/libs/bigdecimal-js/BigDecimal-all-last.js" />
+  <imart type="imuiScript" src="ui/js/math/im_decimal.js" />
+  <imart type="imuiScript" src="im_i18n/number/format/im_decimal_formatter.js" />
+  <imart type="clientDecimalFormatScript" />
+  <imart type="imuiSessionKeeper" autoKeep="true" />
+  <style>
+    .imui-confirm-message {
+      white-space: pre-line;
+    }
+  </style>
+  <script src="csjs/im_date.js"></script>
+  <!-- jsspRpc -->
+  <imart type="jsspRpc" name="Practice01PeopleZZZ" callback="dataZZZCallback"
+    page="training/dzu/practices/practice_01/control/practice01PeopleZZZ" />
+  <imart type="jsspRpc" name="exportFile" callback="exportFileCallback"
+    page="training/dzu/practices/practice_01/control/exportFile" />
+
+
+  <script>
+    const dialogObj = {
+      title: 'Delete Record',
+      message: 'Are you sure you want to delete xxx? \n This action cannot be undone.',
+      okButton: 'OK',
+      cancelButton: 'Cancel'
+    }
+    $.rowId = null;
+    function onCellSelect(rId, iCol, cellContent, e) {
+      $.rowId = rId;
+      if (iCol == 1) {
+        $('#detailDialog').imuiDialog('open');
+        $('[name="dialogType"]').val('edit');
+        $('#ui-dialog-title-detailDialog').text('Edit People');
+      } else if (iCol == 2) {
+        // $.imuiFormUtilDialog.buttons['ok'] = 'Ok'; // set Label button OK Dialog
+        // $.imuiFormUtilDialog.buttons['cancel'] = 'Cancel'; // set Label button Cancel Dialog
+        let msg = dialogObj.message.replace('xxx', $('#list').getRowData($.rowId).fullName);
+        let deleteData = function () {
+          let req = {};
+          req.peopleCode = $('#list').getRowData($.rowId).peopleCode;
+          Practice01PeopleZZZ.deleteByCode(req);
+        }
+        let cancelData = function () {
+          $.rowId = null;
+          return;
+        }
+        imuiConfirm(msg, dialogObj.title, deleteData, cancelData)
+      } else {
+        return;
+      }
+    }
+
+    function onDetailDialogOpen() {
+      imuiResetForm('#detailPeople');
+      var $rows = $('table.imui-table-fileupload tbody tr');
+      if ($rows.length > 0) {
+        $rows.remove();
+      }
+
+      let dialogType = $('[name="dialogType"]').val();
+      let rowData = $('#list').getRowData($.rowId);
+      $('[name="peopleId"]').val(rowData.peopleId);
+      $('[name="fullName"]').val(rowData.fullName);
+      $('[name="email"]').val(rowData.email);
+      $('[name="phone"]').val(rowData.phone);
+      $('[name="status"]').val(rowData.status);
+      $('[name="birthDate"]').val(rowData.birthDate);
+      $('[name="peopleCode"]').val(rowData.peopleCode);
+      $('[name="avatarTempPath"]').val(rowData.avatarFileId);
+      loadImage(rowData.avatarFileId);
+    }
+
+    function onDetailDialogClose() {
+      $.rowId = null;
+    }
+
+    function getDataByKeyword() {
+      let req = {};
+      req.keyword = $('[name="keyword"]').val();
+      Practice01PeopleZZZ.getDataByKeyword(req);
+    }
+
+    function reloadGrid(gridData) {
+      $('#list').clearGridData();
+      $('#list').setGridParam({ data: gridData }).trigger('reloadGrid');
+    }
+
+    function dataZZZCallback(res) {
+      if (!res.isError) {
+        if (res.type == 'getDataByKeyword') {
+          reloadGrid(res.data);
+        } else if (res.type == 'insertPeople') {
+          getDataByKeyword();
+        } else if (res.type == 'updatePeople') {
+          // getDataByKeyword();
+        } else if (res.type == 'deleteByCode') {
+          getDataByKeyword();
+        }
+      } else {
+        imuiShowErrorMessage(res.msg);
+      }
+    }
+
+    function base64ToUint8Array(base64) {
+      var binary = atob(base64);
+      var len = binary.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function exportFileCallback(res) {
+      if (res && res.success) {
+        var blob;
+        var filename;
+
+        if (res.type === 'csv') {
+          blob = new Blob(["\uFEFF" + res.content], { type: 'text/csv;charset=utf-8;' });
+          filename = "People_Export.csv";
+        } else if (res.type === 'excel') {
+          blob = new Blob([res.content], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          filename = "People_Export.xls";
+        } else if (res.type === 'excelJava') {
+          var bytes = base64ToUint8Array(res.content); 
+          blob = new Blob([bytes], {
+            type: 'application/vnd.ms-excel'
+          });
+          filename = "People_Export_Java.xls";
+        } else { 
+          imuiShowErrorMessage("Export failed: Invalid export payload");
+          return;
+        }
+
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        imuiShowSuccessMessage(res.message);
+      } else {
+        imuiShowErrorMessage(res.message);
+      }
+    }
+
+    function loadImage(imagePath) {
+      if (!imagePath) imagePath = "training/zzz/avatar_zzz.jpg"
+      const getImg = 'view/dzu/practices/practice_01/control/getImage?'
+      let nextSrc = getImg + "path=" + imagePath + "&zzz=" + new Date().getTime();
+      let el = document.getElementById('avatarPicture');
+      el.src = nextSrc
+    }
+
+    function exportFile(req) {
+      let params = [];
+      params.push('type=' + req.type);
+      if ($('[name="keyword"]').val()) {
+        params.push('keyword=' + $('[name="keyword"]').val());
+      }
+      let param = params.join('&');
+      const urlExportFile = 'view/dzu/practices/practice_01/control/exportFile?' + param;
+      window.location.href = urlExportFile;
+    }
+  </script>
+</imart>
+
+
+<div class="imui-form-container-wide">
+  <div class="imui-chapter-title">
+    <h2>Toolbars</h2>
+  </div>
+  <div class="imui-form-button-area">
+    <imart type="imuiTextbox" name="keyword" placeholder="Keyword..." />
+
+    <imart type="imuiButton" class="imui-small-button " id="btnSearch" label="Search"
+      iconClass="im-ui-icon-common-16-search" />
+    <imart type="imuiButton" class="imui-small-button ml-10" id="btnAddPeople" label="Add"
+      iconClass="im-ui-icon-common-16-plus" />
+    <imart type="imuiButton" class="imui-small-button ml-10" id="btnExportCsv" label="Export CSV"
+      iconClass="im-ui-icon-common-16-attach-file-txt" />
+    <imart type="imuiButton" class="imui-small-button ml-10" id="btnExportExcel" label="Export Excel"
+      iconClass="im-ui-icon-common-16-attach-file-excel" />
+    <imart type="imuiButton" class="imui-small-button ml-10" id="btnExportExcelJava" label="Export Excel Java"
+      iconClass="im-ui-icon-common-16-attach-file-excel" />
+    <imart type="imuiButton" class="imui-small-button " id="btnTestFile" label="Test File"
+      iconClass="im-ui-icon-common-16-search" />
+  </div>
+  <div class="imui-chapter-title mt-20">
+    <h2>
+      List People
+    </h2>
+  </div>
+
+  <imart type="imuiListTable" id="list" data=$data.listData onCellSelect="onCellSelect" rowNumbers="true"
+    height="294px">
+    <pager rowNum="10" />
+    <cols>
+      <col name="actionUpdate" sortable="false" align="center" width="15px">
+      <showIcon iconClass="im-ui-icon-common-16-update" />
+      </col>
+      <col name="actionDelete" sortable="false" align="center" width="15px">
+      <showIcon iconClass="im-ui-icon-common-16-trashbox" />
+      </col>
+      <col name="peopleId" caption="People ID" hidden />
+      <col name="peopleCode" caption="People Code" />
+      <col name="fullName" caption="Full Name" />
+      <col name="email" caption="Email" />
+      <col name="phone" caption="Phone" />
+      <col name="status" caption="Status" />
+      <col name="birthDate" hidden />
+      <col name="avatarFileId" hidden />
+    </cols>
+  </imart>
+</div>
+
+<imart type="imuiDialog" id="detailDialog" autoOpen="false" autoWidth="60" autoHeight="50" resizable="false"
+  modal="false" onOpen="onDetailDialogOpen" onClose="onDetailDialogClose">
+  <imart type="include" page="training/dzu/practices/practice_01/views/detail_screen" />
+</imart>
+
+
+<script>
+
+  $(function () {
+    $('#btnSearch').click(function () {
+      getDataByKeyword();
+    });
+
+    $('#btnAddPeople').click(function () {
+      $('#detailDialog').imuiDialog('open');
+      $('[name="dialogType"]').val('add');
+      $('#ui-dialog-title-detailDialog').text('New People');
+    });
+
+    $('#btnExportCsv').click(function () {
+      // let req = {};
+      // req.data = $('#list').getGridParam('data');
+      // req.type = 'csv';
+      // exportFile.exportFile(req);
+      exportFile({ type: 'csv' });
+    });
+
+    $('#btnExportExcel').click(function () {
+      // let req = {};
+      // req.data = $('#list').getGridParam('data');
+      // req.type = 'excel';
+      // exportFile.exportFile(req);
+      exportFile({ type: 'excel' });
+    });
+
+    $('#btnExportExcelJava').click(function () {
+      let req = {};
+      req.data = $('#list').getGridParam('data');
+      req.type = 'excelJava';
+      exportFile.exportExcelJava(req);
+    });
+
+    function testFile() {
+      let params = [];
+      // params.data = $('#list').getGridParam('data');
+      params.push('type=' + 'excel');
+      if ($('[name="keyword"]').val()) {
+        params.push('keyword=' + $('[name="keyword"]').val());
+      }
+      let param = params.join('&');
+      const urlTestFile = 'view/dzu/practices/practice_01/control/testFile?' + param;
+      window.location.href = urlTestFile;
+    }
+
+    $('#btnTestFile').click(function () {
+      testFile();
+    });
+    // init data
+    getDataByKeyword();
+  });
+
+</script>
+
+
+</html>

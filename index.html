@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- ⑥head タグ-->
+<imart type="head">
+  <title>ZZZ</title>
+  <!-- css -->
+  <imart type="imuiLink" href="ui/css/imui.css" />
+  <!-- js -->
+  <imart type="imuiScript" src="ui/libs/bigdecimal-js/BigDecimal-all-last.js" />
+  <imart type="imuiScript" src="ui/js/math/im_decimal.js" />
+  <imart type="imuiScript" src="im_i18n/number/format/im_decimal_formatter.js" />
+
+  <imart type="clientDecimalFormatScript" />
+  <!-- session keeper -->
+  <imart type="imuiSessionKeeper" autoKeep="true" />
+
+  <!-- script for validation -->
+  <imart type="imuiScript" src="ui/libs/jquery-validation-1.9.0/jquery.validate.js" />
+  <imart type="imuiValidationRule" rule="training/dzu/validator#rules" rulesName="rules" messagesName="msg" />
+
+  <!-- script for sharedResource -->
+  <script>
+    function myCallback(e) {
+      let userCd = $('[name="userCd"]').val();
+      if (!userCd || userCd == 'anonymous') {
+        $('#submitBtn').prop('disabled', true);
+        return false;
+      }
+      if (e.lockState.locked) {
+        if (e.lockState.ownerCd == userCd) {
+          $('#submitBtn').prop('disabled', false);
+        } else {
+          $('#submitBtn').prop('disabled', true);
+        }
+      } else {
+        $('#submitBtn').prop('disabled', false);
+      }
+    }
+  </script>
+
+
+  <!-- jsspRpc -->
+  <imart type="jsspRpc" name="Common" callback="getDataCB" page="training/dzu/api/common" />
+  <imart type="jsspRpc" name="FileUtil" callback="getFileCB" page="training/dzu/api/fileUtil" />
+  <imart type="jsspRpc" name="Database" callback="getDataDB" page="training/dzu/sql/database" />
+
+  <script>
+    let util = (function () {
+      return {
+        itemIsExist: function (item) { return $('#' + item).length > 0 },
+        getItemValue: function (item) { return util.itemIsExist(item) ? $('#' + item).val() || $('[name="' + item + '"]').val() : '' },
+        setItemValue: function (item, val) { util.itemIsExist(item) ? $('#' + item).val(val || '') : $('[name="' + item + '"]').val(val || '') },
+        selectOnChange: function () {
+          util.setItemValue('txtList', this.value);
+          if (this.value) {
+            $('#selectListOk').show();
+            $('#selectListNg').hide();
+            util.setItemValue('hideSelectList', true);
+          } else {
+            $('#selectListOk').hide();
+            $('#selectListNg').show();
+            util.setItemValue('hideSelectList', false);
+          }
+        },
+        isCheck: function (item) {
+          if (!item.checked) {
+            $('#cbListAll').prop('checked', false);
+          } else {
+            let flg = false;
+            for (let i = 1; i <= 5; i++) {
+              let item = 'cbList' + i;
+              if ($('#' + item).is(':checked')) {
+                flg = true
+              } else {
+                flg = false;
+                break;
+              }
+            }
+            if (flg) $('#cbListAll').prop('checked', true);
+          }
+        }
+      }
+    })();
+
+    $(function () {
+      $('#getList').click(function () {
+        util.setItemValue('txtList', util.getItemValue('selectList'));
+      })
+      $('#clearList').click(function () { util.setItemValue('txtList') });
+      $('#clearCalendar').click(function () { util.setItemValue('txtCalendar') });
+      $('#showList').click(function () {
+        let inputVal = util.getItemValue('txtList');
+        let inputText = 'Giá trị select hiện tại: ' + inputVal || 'NULL';
+        let cbList = [];
+        for (let i = 1; i <= $('[name="cbList"]').length; i++) {
+          let item = 'cbList' + i;
+          if ($('#' + item).is(':checked')) {
+            cbList.push($('#' + item).val());
+          }
+        }
+        let cbText = 'Giá trị checkBox hiện tại: ' + cbList.join(',') || 'NULL';
+        let txtAreaText = 'Giá trị textArea hiện tại: ' + util.getItemValue('txtArea') || 'NULL';
+        let calendarText = 'Giá trị calendar hiện tại: ' + util.getItemValue('txtCalendar') || 'NULL';
+        // return Result
+        $('#resultList').html([inputText, cbText, txtAreaText, calendarText].join("<br>"));
+      });
+      $('#cbListAll').click(function () {
+        for (let i = 1; i <= $('[name="cbList"]').length; i++) {
+          let item = 'cbList' + i;
+          $('#' + item).prop('checked', this.checked);
+        }
+      })
+      $('#btnDialogUpload').click(function () {
+        $('#dialogUpload').imuiDialog('open');
+      })
+
+      $('#showList').click();
+
+      $('#submitBtn').click(function (e) {
+        imuiConfirm('Do you want to submit?', 'Submit Confirm', btnOk, btnCancel)
+        // e.preventDefault();
+      }
+      )
+
+      $('[name="radio"]').on('change', function () {
+        let data = {
+          'appId': 'dzu',
+          'businessKey': 'doc123',
+          'isLock': this.value
+        }
+        if (this.value == 0) {
+          // Common.controlApplication(data);
+        } else {
+          // Common.controlApplication(data);
+        }
+      })
+
+      $('#iconAdd').click(function () {
+        $('#tree').jstree('open_all');
+      })
+
+      $('#iconRemove').click(function () {
+        $('#tree').jstree('close_all');
+      })
+
+      $('#getFile').click(function () {
+        let req = {};
+        req.folderPath = $('#folderPath').val();
+        req.fileName = $('#fileName').val();
+        FileUtil.getFile(req);
+      })
+
+      $('#getDataDB').click(function () {
+        let req = {};
+        req.dbType = $('[name="dbType"]').val();
+        req.dbName = $('#dbName').val();
+        req.skip = $('#skip').val();
+        req.limit = $('#limit').val();
+        req.filter = {
+          kkfcdksy: $('#filterCol1').val(),
+          kkfnmksy: $('#filterCol2').val(),
+          salesname: $('#filterCol3').val()
+        }
+        Database.getData(req);
+      })
+
+      $('[name=radioDbType]').bind('click', function () {
+        $('[name="dbType"]').val(this.value);
+      });
+    })
+    function controlApplicationCB(res) {
+      console.log(res);
+    }
+    function getDataCB(res) {
+      if (res.status == 200) {
+        imuiShowSuccessMessage('Success!!!!!', null, 3000);
+        $(document.body).imuiIndicator('destroy');
+        util.setItemValue('txtArea', JSON.stringify(res));
+      }
+    }
+    function btnOk() {
+      var ssjsRules = $.extend(true, {}, rules);
+      var ssjsMessage = $.extend(true, {}, msg);
+
+      ssjsRules.multiSelected = { requiredMultiDragbox: true, caption: 'requiredMultiDragbox', __caption__: 'Right box' };
+      ssjsMessage.requiredMultiDragbox = '{0} is required';
+      // ssjsMessage.requiredMultiDragbox1 = '{0} is required1';
+      if (imuiValidate('#zzzform', ssjsRules, ssjsMessage)) {
+        $(document.body).imuiIndicator();
+        let multiDrag = $('#multiDrag').imuiMultiDragbox('items');
+        let form = document.getElementById('zzzform');
+        let data = {
+          checkList: form.cbList.value,
+          selectList: form.selectList.value,
+          input: form.txtList.value,
+          textAre: form.txtArea.value,
+          calendar: form.txtCalendar.value,
+          multiDragSelected: multiDrag.filter(function (item) { return item.selected }).map(function (item) { return { label: item.label, value: item.value } }),
+          multiDragDeselected: multiDrag.filter(function (item) { return !item.selected }).map(function (item) { return { label: item.label, value: item.value } }),
+          SecureToken: form.im_secure_token.value,
+          SecureParameter: form.im_secure_parameters.value
+        }
+        let res = Common.getData(data)
+        util.setItemValue('txtArea', JSON.stringify(res));
+      }
+    }
+    function btnCancel() {
+      return false;
+    }
+
+    function getFileCB(res) {
+      $('#fileResult').empty();
+      console.log(res);
+      let divResult = $('#fileResult');
+      let listItemHtml = '';
+      for (let key in res) {
+        listItemHtml += '<li>' + key + ': ' + res[key] + '</li>';
+      }
+      $('#fileResult').append(listItemHtml);
+    }
+
+    function getDataDB(res) {
+      console.log(res);
+      $('#listDB').clearGridData()
+      let data = res.data.map(function (item, index) {
+        return { "id": index, "col1": item.kkfcdksy, "col2": item.kkfnmksy, "col3": item.salesname }
+      })
+      for (var i = 0; i < data.length; i++) {
+        $("#listDB").jqGrid('addRowData', data[i].id, data[i]);
+      }
+    }
+
+  </script>
+
+  <imart type="sharedResource" application="dzu" key="doc123" usePicture="false" el="#zzzdiv" callback="myCallback"
+    useLock="true" />
+</imart>
+<!-- ②画面タイトル -->
+<div class="imui-title">
+  <h1>ZZZ's Screen</h1>
+</div>
+
+<!-- include toolbar -->
+<imart type="include" page="training/dzu/component/toolbar" />
+<imart type="imuiDropdown" data=$data.dataDropdown />
+<!-- ④コンテンツエリア -->
+<div class="imui-form-container-wide">
+  <form id="zzzform" name="zzzform" data=$data>
+    <imart type="imSecureToken" />
+    <imart type="secureParameter" name="secureParameter" value="value" />
+
+    <div class="imui-chapter-title">
+      <h2 class="imui-title">
+        <imart type="loginUser" style="code"></imart>
+      </h2>
+      <imart type="imuiTabs">
+        <imart type="imuiTabItem" title="List Item">
+          <table class="imui-form">
+            <tbody>
+              <tr>
+                <th style="min-width: 150px;"></th>
+                <td>
+                  <imart type="imuiCheckbox" label="All" id="cbListAll" />
+                </td>
+              </tr>
+              <tr>
+                <th><label>List checkbox</label></th>
+                <td>
+                  <imart type="repeat" id="listCb" list=$data.cbList item="item" index="idx">
+                    <imart type="imuiCheckbox" label=item.label value=item.value name="cbList" id=item.id
+                      onClick="util.isCheck(this)" />
+                  </imart>
+                  <imart type="hidden" hideCbList="" />
+                </td>
+              </tr>
+              <tr>
+                <th><label>Radio</label></th>
+                <td>
+                  <imart type="imuiRadio" name="radio" label="Lock" value="1" />
+                  <imart type="imuiRadio" name="radio" label="Unlock" value="0" />
+                </td>
+              </tr>
+              <tr>
+                <th><label class="imui-required">List</label></th>
+                <td>
+                  <imart type="imuiSelect" list=$data.sampleList id="selectList" name="selectList"
+                    onChange="util.selectOnChange" />
+                  <imart type="imuiShowIcon" hidden id="selectListOk" iconId="im-ui-icon-common-16-tick_16"
+                    style="width: 16px; height: 16px;" />
+                  <imart type="imuiShowIcon" hidden id="selectListNg" iconId="im-ui-icon-common-16-ng_16"
+                    style="width: 16px; height: 16px;" />
+                  <imart type="hidden" hideSelectList="" />
+                </td>
+              </tr>
+              <tr>
+                <th><label class="imui-required">Input</label></th>
+                <td>
+                  <imart type="imuiTextbox" id="txtList" name="txtList" />
+                  <a id="clearList" class="imui-icon-picker-palette-clear">
+                    <imart type="imuiShowIcon" iconId="im-ui-icon-common-16-clear_16" />
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <th><label>Textarea</label></th>
+                <td>
+                  <imart type="imuiTextArea" id="txtArea" height="25%" width="55%" maxHeight="100px" maxWidth="400px">
+                  </imart>
+                </td>
+              </tr>
+              <tr>
+                <th><label>Calendar</label></th>
+                <td>
+                  <input type="text" id="txtCalendar" />
+                  <imart type="imuiCalendar" floatable="true" altField="#txtCalendar" showButtonPanel="false" />
+                  <a id="clearCalendar" class="imui-icon-picker-palette-clear">
+                    <imart type="imuiShowIcon" iconId="im-ui-icon-common-16-clear_16" />
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <th><label>Resut</label></th>
+                <td>
+                  <div id="resultList"></div>
+                </td>
+              </tr>
+              <tr>
+                <th><label>File Upload</label></th>
+                <td>
+                  <imart type="imuiButton" id="btnDialogUpload" label="Upload" class="imui-medium-button"
+                    iconClass="im-ui-icon-common-16-file-upload" />
+                </td>
+              </tr>
+              <tr>
+                <th><label>Rich Text</label></th>
+                <td>
+                  <imart type="imuiRichtextbox" name="richText" decoration="menu" />
+                </td>
+              </tr>
+              <tr>
+                <th><label>Video</label></th>
+                <td>
+                  <imart type="imuiVideo">
+                    <imart type="imuiVideoItem" src="sample/video/intra-mart.mov" contentType="video/mp4" />
+                  </imart>
+                </td>
+              </tr>
+              <tr>
+                <th><label>Search Icon</label></th>
+                <td>
+                  <imart type="imuiIconPicker" name="icon-id" />
+                </td>
+              </tr>
+              <tr>
+                <th></th>
+                <td>
+                  <imart type="imuiButton" class="imui-button" label="Get List Value" id="getList" />
+                  <imart type="imuiButton" class="imui-button" label="Show Result" id="showList" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </imart>
+        <imart type="imuiTabItem" title="List Table">
+          <imart type="imuiListTable" id="listUser" data=$data.listUser caption="Table" rowNumbers="true"
+            autoWidth="true" height="161">
+            <cols>
+              <col name="userCd" caption="User CD" width="50px" />
+              <col name="userName" caption="User Name" width="100px" />
+              <col name="userInfo" caption="User Info" />
+            </cols>
+            <pager rowNum="5" rowList="5,10,15" />
+          </imart>
+        </imart>
+        <imart type="imuiTabItem" title="Tree User">
+          <ul>
+            <li>
+              <a id="iconAdd">
+                <imart type="imuiShowIcon" iconId="im-ui-icon-common-16-plus_16" />
+              </a>
+              <a id="iconRemove">
+                <imart type="imuiShowIcon" iconId="im-ui-icon-common-16-minus_16" />
+              </a>
+            </li>
+          </ul>
+          <ul>
+            <imart type="imuiTree" id="tree" value=$data.treeData parameter=$data.params cache="true" />
+          </ul>
+        </imart>
+        <imart type="imuiTabItem" title="Multi Drag">
+          <form id="multiDragForm" method="POST">
+            <imart type="imuiMultiDragbox" id="multiDrag" values=$data.multiDragData
+              validateSelectedName="multiSelected" validateDeselectedName="multiDeselected" />
+          </form>
+        </imart>
+        <imart type="imuiTabItem" title="File">
+          <table class="imui-form">
+            <tr>
+              <th class="wd-20"><label>Folder Public Path</label></th>
+              <td>
+                <imart type="imuiTextbox" id="folderPath" placeholder="Enter folder path" />
+              </td>
+            </tr>
+            <tr>
+              <th><label>File Name</label></th>
+              <td>
+                <imart type="imuiTextbox" id="fileName" placeholder="Enter file name" />
+              </td>
+            </tr>
+            <tr>
+              <th><label>Result</label></th>
+              <td>
+                <div id="fileResult" class="ml-10"></div>
+              </td>
+            </tr>
+            <tr>
+              <th><label>Get File</label></th>
+              <td>
+                <imart type="imuiButton" id="getFile" value="Get File" class="imui-medium-button" />
+              </td>
+            </tr>
+          </table>
+        </imart>
+        <imart type="imuiTabItem" title="Database">
+          <table class="imui-form">
+            <tr>
+              <th class="wd-20"><label>DB Name</label></th>
+              <td>
+                <imart type="imuiTextbox" id="dbName" placeholder="Enter DB name" value="dp_nim059_x" />
+              </td>
+            </tr>
+            <tr>
+              <th><label>Type</label></th>
+              <td>
+                <imart type="imuiRadio" name="radioDbType" value="1" label="Execute" checked="true" />
+                <imart type="imuiRadio" name="radioDbType" value="2" label="Fetch" />
+                <imart type="hidden" dbType="1" />
+              </td>
+            </tr>
+            <tr>
+              <th><label>Number Record (Skip ~ Limit)</label></th>
+              <td>
+                <imart type="imuiTextbox" id="skip" placeholder="Enter skip" value="0" />
+                <label> ~ </label>
+                <imart type="imuiTextbox" id="limit" placeholder="Enter limit" value="10" />
+              </td>
+            </tr>
+            <tr>
+              <th><label>Filter</label></th>
+              <td>
+                <table class="imui-table wd-335px">
+                  <tbody>
+                    <tr>
+                      <th class="wd-20"><label>Col 1</label></th>
+                      <td>
+                        <imart type="imuiTextbox" id="filterCol1" placeholder="Enter filter" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label>Col 2</label></th>
+                      <td>
+                        <imart type="imuiTextbox" id="filterCol2" placeholder="Enter filter" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th><label>Col 3</label></th>
+                      <td>
+                        <imart type="imuiTextbox" id="filterCol3" placeholder="Enter filter" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <th><label>Result</label></th>
+              <td>
+                <imart type="imuiListTable" id="listDB" data=$data.initGrid rowNumbers="true" autoWidth="true"
+                  height="279">
+                  <cols>
+                    <col name="col1" caption="Col 1" />
+                    <col name="col2" caption="Col 2" />
+                    <col name="col3" caption="Col 3" />
+                  </cols>
+                </imart>
+              </td>
+            </tr>
+            <tr>
+              <th><label>Get Data</label></th>
+              <td>
+                <imart type="imuiButton" id="getDataDB" value="Get Data" class="imui-medium-button" />
+              </td>
+            </tr>
+          </table>
+        </imart>
+      </imart>
+
+    </div>
+    <imart type="imuiButton" id="submitBtn" value="Submit" class="imui-medium-button" />
+    <imart type="hidden" userCd=$data.userCd hideSelectList=hideSelectList infoUser=$data.info
+      resource=$data.sharedResource />
+
+  </form>
+</div>
+
+<imart type="imuiDialog" useHelp=$useHelp id="dialogUpload" minWidth="500px" autoOpen="false" buttons=sampleButtons>
+  <imart type="imuiFileUpload" id="uploadItem" enableDelete onSuccess="uploadSuccess" onRemove="removeFile"
+    url="api/dzu/file_receiver" />
+</imart>
+<script type="text/javascript">
+  let fileNmUpload = [];
+  function button_ok() {
+    imuiShowSuccessMessage(fileNmUpload, '!!! Upload success !!!', 3000);
+    button_ng();
+  }
+  function button_ng() {
+    $('#dialogUpload').imuiDialog('close');
+    return;
+  }
+  function uploadSuccess(e, data) {
+    let file = data.files[0];
+    fileNmUpload.push(file.name);
+  }
+  function removeFile(e, data) {
+    let file = data.response[0];
+    imuiShowWarningMessage(`File ${file.name} was removed!`, null, 3000);
+    fileNmUpload.splice(fileNmUpload.indexOf(file.name), 1);
+  }
+</script>
+
+</html>
