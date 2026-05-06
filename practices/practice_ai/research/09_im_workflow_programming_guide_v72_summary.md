@@ -3,6 +3,8 @@
 ## Overview
 This document summarizes the core technical architecture and development patterns for Intra-mart Workflow V7.2, based on the official programming guide.
 
+**Source Document**: [IM-Workflow Programming Guide V7.2 (PDF)](https://download.intra-mart.jp/product/v72_doc/im_workflow_en/development/im_workflow_prog_guide_v72_en.pdf)
+
 ## 1. Action Handler Framework
 Workflow logic is primarily executed through "Action Handlers" (JSSP or Java).
 - **Core Handler**: `action_process.js`.

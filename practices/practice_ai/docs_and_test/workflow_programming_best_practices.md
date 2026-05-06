@@ -3,6 +3,8 @@
 ## Overview
 Based on the V7.2 Programming Guide, this document outlines practical rules and patterns for robust workflow implementation in the Intra-mart Accel Platform.
 
+**Full Documentation**: [IM-Workflow Programming Guide V7.2 (PDF)](https://download.intra-mart.jp/product/v72_doc/im_workflow_en/development/im_workflow_prog_guide_v72_en.pdf)
+
 ## 1. Parameter Handling Rules
 - **DO NOT** modify parameters prefixed with `imw` inside your handlers. These are reserved for the system.
 - **Use for Routing**: Leverage `imwNodeId` to implement conditional business logic (e.g., specific validation only at the "Department Manager" node).
