@@ -1,0 +1,12 @@
+<imart type="head">
+  <script type="text/javascript">
+
+    function callBack() {
+      var returnObject = <imart type="string" value=oResult.returnObject name="a" />;
+      parent['<imart type="string" value=oResult.parentCallBackFunction />'](returnObject);
+    }
+  </script>
+
+</imart>
+
+<body onload="javascript:callBack();"></body>

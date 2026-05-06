@@ -1,0 +1,146 @@
+<imart type="head">
+  <title>Quản lý & Kiểm thử API DZU</title>
+  <style>
+    .zzz-card {
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .zzz-section-icon {
+      font-size: 16px;
+      margin-right: 8px;
+      color: #0078d4;
+    }
+
+    .zzz-label {
+      font-weight: bold;
+      width: 150px;
+      display: inline-block;
+      color: #666;
+    }
+
+    .zzz-value {
+      color: #333;
+    }
+  </style>
+</imart>
+
+<div class="imui-title">
+  <h1><span class="im-ui-icon-common-16-settings"></span> Hệ thống Thực hành Intra-mart API</h1>
+</div>
+
+<div class="imui-toolbar-wrap">
+  <div class="imui-toolbar-inner">
+    <ul class="imui-list-toolbar">
+      <li>
+        <a href="view/dzu/practices/practice_02/zzz_api" class="imui-toolbar-icon">
+          <span class="im-ui-icon-common-16-refresh"></span> Làm mới trang
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="imui-form-container-wide">
+
+  <div class="imui-layout-grid">
+    <div class="imui-g-6">
+      <!-- Section 1: Form Input -->
+      <div class="imui-box zzz-card">
+        <div class="imui-chapter-title">
+          <h2><span class="im-ui-icon-common-16-edit"></span> 1. Kiểm tra Dữ liệu Truyền vào (Request Object)</h2>
+        </div>
+        <div class="imui-box-content">
+          <p class="imui-mb-10">Cung cấp thông tin bên dưới để giả lập một request từ Client lên Server.</p>
+          <form action="view/dzu/practices/practice_02/zzz_api" method="POST">
+            <table class="imui-form">
+              <tbody>
+                <tr>
+                  <th>Họ và tên học viên</th>
+                  <td><input type="text" name="userName" value="" style="width: 100%;"></td>
+                </tr>
+                <tr>
+                  <th>Kỹ năng chuyên môn</th>
+                  <td>
+                    <label class="imui-mr-10"><input type="checkbox" name="hobbies" value="JS/SSJS"> JavaScript /
+                      SSJS</label>
+                    <label class="imui-mr-10"><input type="checkbox" name="hobbies" value="Java/API"> Java / API
+                      Development</label>
+                    <label><input type="checkbox" name="hobbies" value="SQL"> Database / SQL</label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="imui-operation-parts">
+              <input type="submit" value="Thực thi Request" class="imui-button-primary">
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Section 2: Results -->
+      <div class="imui-box zzz-card">
+        <div class="imui-chapter-title">
+          <h2><span class="im-ui-icon-common-16-notes"></span> Kết quả Xử lý từ Server</h2>
+        </div>
+        <div class="imui-box-content">
+          <p><span class="zzz-label">Phương thức HTTP:</span> <span class="zzz-value">
+              <imart type="string" value=$method />
+            </span></p>
+          <p><span class="zzz-label">Học viên:</span> <span class="zzz-value">
+              <imart type="string" value=$userName />
+            </span></p>
+          <p><span class="zzz-label">Danh sách kỹ năng:</span> <span class="zzz-value">
+              <imart type="string" value=$hobbies />
+            </span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="imui-g-6">
+      <!-- Section 3: Web API -->
+      <div class="imui-box zzz-card">
+        <div class="imui-chapter-title">
+          <h2><span class="im-ui-icon-common-16-home"></span> 2. Thông tin Môi trường Web (Web API)</h2>
+        </div>
+        <div class="imui-box-content">
+          <table class="imui-table">
+            <tbody>
+              <tr>
+                <th style="width: 35%;">Đường dẫn gốc (Context)</th>
+                <td><code><imart type="string" value=$contextPath /></code></td>
+              </tr>
+              <tr>
+                <th>URL đã mã hóa</th>
+                <td>
+                  <imart type="string" value=$encodedUrl />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="imui-box-information imui-mt-10">
+            <p><strong>Lưu ý:</strong> Một Header tùy chỉnh (<code>X-Custom-Test-Header</code>) đã được đính kèm vào
+              Response.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: MessageManager -->
+      <div class="imui-box zzz-card">
+        <div class="imui-chapter-title">
+          <h2><span class="im-ui-icon-common-16-info"></span> 3. Quản lý Tin nhắn Hệ thống (MessageManager)</h2>
+        </div>
+        <div class="imui-box-content">
+          <p><span class="zzz-label">Nội dung tin nhắn:</span></p>
+          <div class="imui-box-caution imui-mb-10">
+            <imart type="string" value=$messageValue />
+          </div>
+          <p><span class="zzz-label">Trạng thái mã tin nhắn:</span>
+            <imart type="string" value=$hasMessage />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

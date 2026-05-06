@@ -4,7 +4,9 @@ $data = {
 
 function init(req) {
   isUserLogin();
-  $data.listData = []
+  $data.listData = [];
+
+  
 }
 
 function isUserLogin() {

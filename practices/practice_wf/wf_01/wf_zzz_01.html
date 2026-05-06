@@ -1,0 +1,212 @@
+<html>
+<imart type="head">
+  <title>Workflow ZZZ 01</title>
+  <imart type="workflowOpenPageCsjs" />
+
+  <script>
+    function validateRequired() {
+      var reason = $('textarea[name="leave_reason"]').val();
+      var days = $('input[name="leave_days"]').val();
+      var errors = [];
+
+      if (!reason || reason.trim() === "") {
+        errors.push("Leave Reason is required.");
+      }
+      if (!days || days.trim() === "") {
+        errors.push("Leave Days is required.");
+      } else if (isNaN(days) || parseInt(days) <= 0) {
+        errors.push("Leave Days must be a positive number.");
+      }
+
+      if (errors.length > 0) {
+        imuiShowErrorMessage("Input Error", errors);
+        return false;
+      }
+      return true;
+    }
+
+    function validateTempSave() {
+      var reason = $('textarea[name="leave_reason"]').val();
+      if (!reason || reason.trim() === "") {
+        imuiShowErrorMessage("Input Error", "Please enter Leave Reason for temporary save.");
+        return false;
+      }
+      return true;
+    }
+
+    function setNodeDisplayFlags() {
+      var nodeSetting = {
+        "DCNodeSetting": {
+          "zzz_dnm_01": { 
+            "displayFlag": false, 
+            "enableFlag": true,
+            "searchConditionConfigurableFlag": false,
+            "referentialExtraConfigurableFlag": false,
+            "processTargetConfigs": [] 
+          }
+        },
+        "HVNodeSetting": {
+          "zzz_hrz_01": { 
+            "displayFlag": false, 
+            "enableFlag": true,
+            "searchConditionConfigurableFlag": false,
+            "referentialExtraConfigurableFlag": false,
+            "matterNodeExpansions": [] 
+          }
+        }
+      };
+
+      var nodeSettingJson = ImJson.toJSONString(nodeSetting);
+
+      if ($('input[name=imwNodeSetting]').length === 0) {
+        $("#workflowOpenPageForm").append('<input type="hidden" name="imwNodeSetting" />');
+      }
+      $('input[name=imwNodeSetting]').val(nodeSettingJson);
+    }
+
+    $(function () {
+      $('#back').click(function () {
+        $('#workflowOpenPageForm').attr('action', 'training/dzu/practices/practice_wf/wf_01/wf_zzz_01');
+        $('#workflowOpenPageForm').submit();
+        return false;
+      });
+
+      $('#openPage0').click(function () {
+        if (!validateRequired()) return false;
+        setNodeDisplayFlags();
+        workflowOpenPage('0');
+        return false;
+      });
+
+      $('#openPage1').click(function () {
+        if (!validateTempSave()) return false;
+        workflowOpenPage('1');
+        return false;
+      });
+
+      $('#openPage2').click(function () {
+        if (!validateRequired()) return false;
+        setNodeDisplayFlags();
+        workflowOpenPage('2');
+        return false;
+      });
+
+      $('#openPage3').click(function () {
+        if (!validateRequired()) return false;
+        setNodeDisplayFlags();
+        workflowOpenPage('3');
+        return false;
+      });
+
+      $('#openPage4').click(function () {
+        if (!validateRequired()) return false;
+        workflowOpenPage('4');
+        return false;
+      });
+    });
+
+  </script>
+</imart>
+
+<imart type="workflowOpenPage" name="workflowOpenPageForm" id="workflowOpenPageForm" method="POST" target="_top"
+  imwUserDataId=$data.imwUserDataId imwSystemMatterId=$data.imwSystemMatterId imwAuthUserCode=$data.imwAuthUserCode
+  imwApplyBaseDate=$data.imwApplyBaseDate imwNodeId=$data.imwNodeId imwFlowId=$data.imwFlowId
+  imwCallOriginalParams=$data.imwCallOriginalParams imwNextScriptPath=$data.imwCallOriginalPagePath>
+
+  <div class="imui-form-container-wide">
+    <div class="imui-chapter-title">
+      <h2>Workflow Application</h2>
+    </div>
+
+    <table class="imui-form">
+      <tbody>
+        <tr>
+          <th class="imui-required"><label>Leave Reason</label></th>
+          <td>
+            <imart type="imuiTextArea" name="leave_reason" value=$data.leave_reason style="width: 400px; height: 100px;"
+              placeholder="Enter leave reason..." />
+          </td>
+        </tr>
+        <tr>
+          <th class="imui-required"><label>Leave Days</label></th>
+          <td>
+            <imart type="imuiTextbox" name="leave_days" value=$data.leave_days style="width: 100px;" />
+            <span
+              style="display: inline-block; margin-left: 15px; padding: 2px 8px; background-color: #e7f3ff; border: 1px solid #b3d7ff; color: #004085; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
+              <span class="im-ui-icon-common-16-info"
+                style="display: inline-block; vertical-align: middle; margin-top: -3px;"></span>
+              Rules: &lt;3d: dev07 | 3-6d: dev08 | &ge;7d: dev03
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th><label>Item Total</label></th>
+          <td>
+            <imart type="imuiTextbox" name="item_total" value=$data.item_total style="width: 100px;" />
+            <span
+              style="display: inline-block; margin-left: 15px; padding: 2px 8px; background-color: #fff3e0; border: 1px solid #ffe0b2; color: #e65100; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
+              <span class="im-ui-icon-common-16-info"
+                style="display: inline-block; vertical-align: middle; margin-top: -3px;"></span>
+              Expansion: Default: dev08 | >50k: 3 users | >100k: 5 users
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th><label>Status</label></th>
+          <td>
+            <imart type="imuiTextbox" value=$data.status readonly class="imui-text-readonly" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="imui-chapter-title" style="margin-top: 20px;">
+      <h2>System Information</h2>
+    </div>
+
+    <table class="imui-form">
+      <tbody>
+        <tr>
+          <th><label>Page Type</label></th>
+          <td>
+            <imart type="imuiTextbox" value=$data.imwPageType readonly class="imui-text-readonly" />
+          </td>
+        </tr>
+        <tr>
+          <th><label>User Data ID</label></th>
+          <td>
+            <imart type="imuiTextbox" value=$data.imwUserDataId readonly class="imui-text-readonly" />
+          </td>
+        </tr>
+        <tr>
+          <th><label>Flow ID</label></th>
+          <td>
+            <imart type="imuiTextbox" value=$data.imwFlowId readonly class="imui-text-readonly" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="imui-operation-parts">
+      <imart type="decision" case="0" value=$data.imwPageType>
+        <imart type="imuiButton" value="Apply" id="openPage0" name="openPage0" class="imui-large-button" />
+        <imart type="imuiButton" value="Temp Save" id="openPage1" name="openPage1" class="imui-large-button" />
+      </imart>
+      <imart type="decision" case="1" value=$data.imwPageType>
+        <imart type="imuiButton" value="Apply" id="openPage0" name="openPage0" class="imui-large-button" />
+        <imart type="imuiButton" value="Temp Save" id="openPage1" name="openPage1" class="imui-large-button" />
+      </imart>
+      <imart type="decision" case="2" value=$data.imwPageType>
+        <imart type="imuiButton" value="Apply (Draft)" id="openPage2" name="openPage2" class="imui-large-button" />
+      </imart>
+      <imart type="decision" case="3" value=$data.imwPageType>
+        <imart type="imuiButton" value="Re-apply" id="openPage3" name="openPage3" class="imui-large-button" />
+      </imart>
+      <imart type="decision" case="4" value=$data.imwPageType>
+        <imart type="imuiButton" value="Process" id="openPage4" name="openPage4" class="imui-large-button" />
+      </imart>
+    </div>
+  </div>
+</imart>
+
+</html>

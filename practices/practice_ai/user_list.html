@@ -1,0 +1,181 @@
+<html>
+<imart type="head">
+  <title>User Management System</title>
+
+  <imart type="jsspRpc" name="UserApi" page="training/dzu/practices/practice_ai/api/user" callback="userActionCB" />
+
+  <script>
+    $(function () {
+      // Data initially loaded via data=$data.users
+    });
+
+    function refreshTable() {
+      var keyword = $('#searchKeyword').val();
+      UserApi.getUsers({ keyword: keyword });
+    }
+
+    function userActionCB(res) {
+      console.log("Client: Central Callback received", res);
+      if (res.type === 'getUsers') {
+        if (res.data) {
+          $("#userTable").clearGridData().setGridParam({ data: res.data }).trigger("reloadGrid");
+        }
+      }
+      else if (res.type === 'saveUser') {
+        if (!res.error) {
+          imuiShowSuccessMessage("User saved successfully");
+          $('#userDialog').imuiDialog('close');
+          refreshTable();
+        } else {
+          imuiShowErrorMessage("Save failed: " + res.errorMessage);
+        }
+      }
+      else if (res.type === 'deleteUser') {
+        if (!res.error) {
+          imuiShowSuccessMessage("User deleted successfully");
+          refreshTable();
+        } else {
+          imuiShowErrorMessage("Delete failed: " + res.errorMessage);
+        }
+      }
+    }
+
+    function onCellSelect(rowId, iCol, cellContent, e) {
+      var rowData = $("#userTable").getRowData(rowId);
+      if (iCol == 1) {
+        doEdit(rowData);
+      } else if (iCol == 2) {
+        doDelete(rowData);
+      }
+    }
+
+    function doDelete(rowData) {
+      imuiConfirm(
+        "Are you sure you want to delete user " + rowData.user_id + "?",
+        "Confirmation",
+        function () {
+          UserApi.deleteUser({ user_id: rowData.user_id });
+        }
+      );
+    }
+
+    function doEdit(rowData) {
+      $('#userDialog [name="user_id"]').val(rowData.user_id).prop('readonly', true).addClass('imui-text-readonly');
+      $('#userDialog [name="user_name"]').val(rowData.user_name);
+      $('#userDialog [name="email"]').val(rowData.email);
+      $('#userDialog [name="department"]').val(rowData.department);
+      $('#userDialog [name="notes"]').val(rowData.notes);
+
+      $('#userDialog').imuiDialog('option', 'title', 'Edit User').imuiDialog('open');
+    }
+
+    function doAdd() {
+      $('#userDialog [name="user_id"]').val("").prop('readonly', false).removeClass('imui-text-readonly');
+      $('#userDialog [name="user_name"]').val("");
+      $('#userDialog [name="email"]').val("");
+      $('#userDialog [name="department"]').val("");
+      $('#userDialog [name="notes"]').val("");
+
+      $('#userDialog').imuiDialog('option', 'title', 'Add New User').imuiDialog('open');
+    }
+
+    function doSave() {
+      var user = {
+        user_id: $('#userDialog [name="user_id"]').val(),
+        user_name: $('#userDialog [name="user_name"]').val(),
+        email: $('#userDialog [name="email"]').val(),
+        department: $('#userDialog [name="department"]').val(),
+        notes: $('#userDialog [name="notes"]').val()
+      };
+
+      if (!user.user_id || !user.user_name) {
+        imuiShowErrorMessage("User ID and Name are required.");
+        return;
+      }
+      UserApi.saveUser(user);
+    }
+  </script>
+</imart>
+
+<div class="imui-title">
+  <h1>User Management (Standard Callback Style)</h1>
+</div>
+
+<div class="imui-form-container-wide">
+
+  <div class="imui-operation-parts" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+    <imart type="imuiTextbox" id="searchKeyword" name="searchKeyword" value="" placeholder="Search by name or email..."
+      style="width: 250px;" />
+    <imart type="imuiButton" iconClass="im-ui-icon-common-16-search" value="Search" onclick="refreshTable()" />
+    <div style="flex-grow: 1;"></div>
+    <imart type="imuiButton" iconClass="im-ui-icon-common-16-plus" value="Add New User" onclick="doAdd()" />
+    <imart type="imuiButton" iconClass="im-ui-icon-common-16-refresh" value="Refresh" onclick="refreshTable()" />
+  </div>
+
+  <div class="imui-chapter-title">
+    <h2>User List</h2>
+  </div>
+
+  <imart type="imuiListTable" id="userTable" data=$data.users onCellSelect="onCellSelect" rowNumbers="true"
+    autoWidth="true" height="400" sortname="user_id" sortorder="asc" viewrecords="true" emptyrecords="No users found.">
+    <pager rowNum="15" />
+    <cols>
+      <col name="actionUpdate" caption="Edit" sortable="false" align="center" width="40">
+      <showIcon iconClass="im-ui-icon-common-16-update" />
+      </col>
+      <col name="actionDelete" caption="Del" sortable="false" align="center" width="40">
+      <showIcon iconClass="im-ui-icon-common-16-trashbox" />
+      </col>
+      <col name="user_id" caption="User ID" width="100" align="center" sortable="true" />
+      <col name="user_name" caption="Full Name" width="200" sortable="true" />
+      <col name="email" caption="Email Address" width="250" sortable="true" />
+      <col name="department" caption="Department" width="180" sortable="true" />
+      <col name="notes" hidden />
+    </cols>
+  </imart>
+
+</div>
+
+<!-- User Edit/Add Dialog -->
+<imart type="imuiDialog" id="userDialog" autoOpen="false" width="600" modal="true">
+  <table class="imui-form">
+    <tbody>
+      <tr>
+        <th class="imui-required"><label>User ID</label></th>
+        <td>
+          <imart type="imuiTextbox" name="user_id" />
+        </td>
+      </tr>
+      <tr>
+        <th class="imui-required"><label>User Name</label></th>
+        <td>
+          <imart type="imuiTextbox" name="user_name" style="width: 300px;" />
+        </td>
+      </tr>
+      <tr>
+        <th><label>Email</label></th>
+        <td>
+          <imart type="imuiTextbox" name="email" style="width: 300px;" />
+        </td>
+      </tr>
+      <tr>
+        <th><label>Department</label></th>
+        <td>
+          <imart type="imuiTextbox" name="department" style="width: 250px;" />
+        </td>
+      </tr>
+      <tr>
+        <th><label>Notes</label></th>
+        <td>
+          <imart type="imuiTextArea" name="notes" style="width: 400px; height: 80px;" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="imui-operation-parts">
+    <imart type="imuiButton" value="Save" class="imui-medium-button im-ui-icon-common-16-save" onclick="doSave()" />
+    <imart type="imuiButton" value="Close" class="imui-medium-button" onclick="$('#userDialog').imuiDialog('close')" />
+  </div>
+</imart>
+
+</html>
