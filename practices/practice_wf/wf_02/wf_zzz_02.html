@@ -1,0 +1,88 @@
+<html>
+<imart type="head">
+  <title>Workflow Matters List (wf_02)</title>
+  
+  <style type="text/css">
+    .im-workflow-highlight-row {
+      background-color: #fff9c4 !important;
+    }
+    .matter-id-link {
+      color: #01579b !important;
+      text-decoration: underline !important;
+      cursor: pointer;
+    }
+  </style>
+
+  <script type="text/javascript">
+    /**
+     * onGridComplete: Xử lý tạo URL và Highlight
+     */
+    function onGridComplete() {
+      var $grid = $(this);
+      var ids = $grid.jqGrid('getDataIDs');
+      
+      for (var i = 0; i < ids.length; i++) {
+        var rowId = ids[i];
+        // Lấy dữ liệu đầy đủ của hàng (bao gồm cả các cột hidden)
+        var rowData = $grid.jqGrid('getRowData', rowId);
+        
+        // 1. Tạo URL Workflow động
+        var url = 'im_workflow/common/switch/switch_content?' +
+                  'imwSystemMatterId=' + rowData.system_matter_id +
+                  '&imwUserDataId=' + rowData.user_data_id +
+                  '&imwNodeId=' + rowData.node_id +
+                  '&imwPageType=' + rowData.page_type +
+                  '&imwFlowId=' + rowData.flow_id +
+                  '&imwCallOriginalPagePath=view/training/dzu/practices/practice_wf/wf_02/wf_zzz_02';
+        
+        // 2. Cập nhật ô Matter ID thành liên kết bằng setCell
+        var linkHtml = '<a href="' + url + '" target="_blank" class="matter-id-link">' + rowData.system_matter_id + '</a>';
+        $grid.setCell(rowId, 'system_matter_id', linkHtml);
+
+        // 3. Highlight hàng nếu node_id là 'zzz_approve_01'
+        if (rowData.node_id === 'zzz_approve_01') {
+          $grid.find('#' + rowId).addClass('im-workflow-highlight-row');
+          $grid.setCell(rowId, 'matter_name', '[IMPORTANT] ' + rowData.matter_name);
+        }
+      }
+      
+      console.log("Grid URL update complete.");
+    }
+
+    // Hàm refresh bảng (nếu cần dùng sau này với setGridParam)
+    function reloadTable(newData) {
+      $("#matterTable").clearGridData().setGridParam({ data: newData }).trigger("reloadGrid");
+    }
+  </script>
+</imart>
+
+<div class="imui-title">
+  <h1>Active Workflow Matters</h1>
+</div>
+
+<imui-container-main>
+  <div class="imui-form-container-wide">
+    <div class="imui-chapter-title">
+      <h2>List of active matters for wf_zzz_01</h2>
+    </div>
+    
+    <imart type="imuiListTable" id="matterTable" data=$data.matters height="400" 
+      rowNumbers="true" onGridComplete="onGridComplete">
+      <cols>
+        <!-- Bỏ formatter ở đây, xử lý tập trung trong onGridComplete -->
+        <col name="system_matter_id" caption="Matter ID" width="150" />
+        <col name="matter_name" caption="Matter Name" width="250" />
+        <col name="node_id" caption="Current Node" width="120" />
+        <col name="apply_user_name" caption="Applicant" width="150" />
+        <col name="apply_date" caption="Apply Date" width="150" align="center" />
+        
+        <!-- Các cột ẩn -->
+        <col name="user_data_id" hidden />
+        <col name="flow_id" hidden />
+        <col name="page_type" hidden />
+      </cols>
+    </imart>
+  </div>
+</imui-container-main>
+
+</html>

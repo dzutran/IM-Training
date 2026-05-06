@@ -10,6 +10,7 @@ Current focus areas and future topics for the AI Research Agent.
 *   [x] **Plugin Development**: `plugin.xml` structure for workflow.
 *   [x] **IMUI Validation**: Rules, custom rules, and UI feedback.
 *   [x] **Hybrid API Logic**: Bridging gaps between SSJS and UI node settings.
+*   [x] **Workflow URLs & System Tables**: Active matter monitoring and switch_content.
 
 ## 🚀 Future Topics
 *   **IM-LogicDesigner**: Low-code logic replacement for JSSP.
