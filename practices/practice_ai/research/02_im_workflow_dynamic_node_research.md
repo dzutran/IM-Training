@@ -12,134 +12,61 @@ The workflow engine looks for specific arrays within the `parameter` object:
 
 ### 2.2. Dynamic Node Configuration (zzz_dnm_01)
 **Object Type:** `DynamicAndCnfmNodeConfigInfo`
-- `nodeId`: `String` (The ID of the node in the flow definition, e.g., `"zzz_dnm_01"`).
+- `nodeId`: `String` (The ID of the node in the flow definition).
 - `processTargetConfigs`: `Array<PluginInfo>` (Array of plugins to set as process targets).
-
-**PluginInfo structure:**
-- `extensionPointId`: `"jp.co.intra_mart.workflow.plugin.authority.node.dynamic"`
-- `pluginId`: `"jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user"`
-- `parameter`: `String` (The User ID of the approver).
 
 ### 2.3. Horizontal Node Configuration (zzz_hrz_01)
 **Object Type:** `HorizontalAndVerticalNodeConfigInfo`
-- `nodeId`: `String` (The ID of the node in the flow definition, e.g., `"zzz_hrz_01"`).
+- `nodeId`: `String` (The ID of the node in the flow definition).
 - `matterNodeExpansions`: `Array<MatterNodeExpansionInfo>` (Array of node expansion definitions).
 
-**MatterNodeExpansionInfo structure:**
-- `nodeName`: `String` (Display name of the expanded node).
-- `processTargetConfigModel`: `Array<PluginInfo>` (**Note:** Singular name `processTargetConfigModel` as per documentation).
-
 ### 2.4. Key Differences: JS (Backend) vs HTML (Frontend)
-The property names and available flags differ between the SSJS API and the `imwNodeSetting` JSON.
-
 | Feature | Backend (JS: `ApplyParamInfo`) | Frontend (HTML: `imwNodeSetting`) |
 | :--- | :--- | :--- |
 | **Top-level Keys** | `DCNodeConfigModels`, `HVNodeConfigModels` | `DCNodeSetting`, `HVNodeSetting` |
 | **UI Flags** | **N/A** (Engine-only) | `displayFlag`, `enableFlag` |
-| **Advanced Flags** | **N/A** | `searchConditionConfigurableFlag`, etc. |
-| **HV Expansion** | `matterNodeExpansions` | `matterNodeExpansions` |
 | **HV Target Key** | `processTargetConfigModel` (Singular) | `processTargetConfigModel` (Singular) |
 
-## 3. Implementation in action_process.js
-Instead of using `new` constructors (which may fail in SSJS if not properly imported), use plain JavaScript object literals to ensure structural compatibility.
+### 2.5. Robust Hybrid Structure (Recommended)
+Due to inconsistencies across Intra-mart versions and SSJS/Java API interpretations, it is recommended to use a **Hybrid Structure** that includes both nested and flat properties.
 
-### Correct Pattern for Dynamic Node:
+**Node Object Properties:**
+- `processTargetConfigs`: Array of `PluginInfo` (Standard IAP).
+- `pluginId`: Flat property on node (Older/SSJS fallback).
+- `extensionPointId`: Flat property on node.
+- `parameter`: Flat property on node.
+- `pluginParameter`: Alias for `parameter`.
+
+**ApplyParamInfo Top-level Keys:**
+- `DCNodeConfigModels`: Official camelCase key.
+- `dynamicAndCnfmNodeConfigModels`: Lowercase alias used in some SSJS environments.
+
+## 3. Implementation in action_process.js (Robust Version)
 ```javascript
-var dynamicPlugin = {
-  extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-  pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-  parameter: "dev08"
-};
+  var dynamicNode = {
+    nodeId: "zzz_dnm_01",
+    // Nested (Newer API)
+    processTargetConfigs: [{
+      extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+      pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+      parameter: "dev08"
+    }],
+    // Flat (Older/SSJS API fallback)
+    extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+    pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+    parameter: "dev08",
+    pluginParameter: "dev08"
+  };
 
-var dynamicNode = {
-  nodeId: "zzz_dnm_01",
-  processTargetConfigs: [dynamicPlugin] // NOTE: processTargetConfigs
-};
-
-parameter.DCNodeConfigModels = [dynamicNode];
-```
-
-### Correct Pattern for Horizontal Node:
-```javascript
-var hrzPlugin = {
-  extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-  pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-  parameter: "dev08"
-};
-
-var expansion = {
-  nodeName: "Approval (dev08)",
-  processTargetConfigModel: [hrzPlugin] // NOTE: processTargetConfigModel (singular)
-};
-
-var hrzNode = {
-  nodeId: "zzz_hrz_01",
-  matterNodeExpansions: [expansion]
-};
-
-parameter.HVNodeConfigModels = [hrzNode];
+  // Set both variants for safety
+  parameter.DCNodeConfigModels = [dynamicNode];
+  parameter.dynamicAndCnfmNodeConfigModels = [dynamicNode];
 ```
 
 ## 4. Troubleshooting
-- **Property Names:** IM-Workflow APIs are case-sensitive and inconsistent (e.g., `processTargetConfigs` vs `processTargetConfigModel`). Always refer to the specific Info object documentation.
-- **Node Configurable:** Ensure the node in the Workflow Designer has "Process Target Configurable" (処理対象者設定可能) checked.
+- **Property Names:** IM-Workflow APIs are case-sensitive and inconsistent. Always refer to the specific Info object documentation.
+- **Node Configurable:** Ensure the node in the Workflow Designer has "Process Target Configurable" checked.
 - **Injection Point:** Inject objects into `parameter` within the `apply` function of the action script.
 
-## 5. Workflow Execution (ApplyManager)
-
-To programmatically execute a workflow application, use the `ApplyManager` class.
-
-### 5.1. ApplyManager.apply Method
-**Signature:**
-```javascript
-WorkflowResultInfo apply(ApplyParamInfo applyParam, Object userParam)
-```
-
-**Parameters:**
-- **`applyParam`**: An `ApplyParamInfo` object containing the workflow configuration.
-- **`userParam`**: A plain JavaScript object (key-value pairs) that will be passed to the Action Process scripts.
-
-### 5.2. Page-Side Code Example
-```javascript
-function applyWorkflow() {
-    var applyManager = new ApplyManager();
-    
-    // 1. Prepare ApplyParamInfo
-    var applyParam = {
-        flowId: "zzz_flow_01",
-        applyExecuteUserCd: "dev01",
-        applyAuthUserCd: "dev01",
-        applyBaseDate: "2026/05/06",
-        matterName: "Custom Applied Matter",
-        
-        // You can pre-configure dynamic nodes here if needed
-        DCNodeConfigModels: [
-            {
-                nodeId: "zzz_dnm_01",
-                processTargetConfigs: [
-                    {
-                        extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-                        pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-                        parameter: "dev08"
-                    }
-                ]
-            }
-        ]
-    };
-
-    // 2. Prepare User Data (passed to userParameter in action_process.js)
-    var userParam = {
-        leave_days: 10,
-        leave_reason: "Research"
-    };
-
-    // 3. Execute Apply
-    var result = applyManager.apply(applyParam, userParam);
-
-    if (!result.error) {
-        return "Applied successfully. Matter ID: " + result.data.systemMatterId;
-    } else {
-        return "Apply failed: " + result.message;
-    }
-}
-```
+---
+*Last Updated: 2026-05-06 by AI Research Agent*

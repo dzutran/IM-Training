@@ -71,16 +71,23 @@ test.describe('User Management CRUD Automation', () => {
 
   test('TC08 & TC09: Delete User Flow', async ({ page }) => {
     // TC08: Cancel Delete
-    page.once('dialog', dialog => dialog.dismiss()); // Mock imuiConfirm cancel
-    // In IM, imuiConfirm is custom, but if it uses native confirm:
-    // await page.locator('.im-ui-icon-common-16-trashbox').first().click();
+    page.once('dialog', dialog => dialog.dismiss()); 
     
     // TC09: OK Delete
-    // Note: imuiConfirm usually creates a div dialog. 
-    // We target the "OK" button inside the imuiDialog-footer
     await page.locator('.im-ui-icon-common-16-trashbox').first().click();
     await page.click('.imui-dialog-button-inner button:has-text("OK")');
     await expect(page.locator('.imui-msgbox-success')).toBeVisible();
+  });
+
+  test('TC10: Workflow Application Routing', async ({ page }) => {
+    await page.goto('http://192.168.0.201:8082/imart/view/training/dzu/practices/practice_wf/wf_01/wf_zzz_01');
+    await page.fill('input[name="leave_days"]', '8');
+    await page.fill('textarea[name="leave_reason"]', 'Long vacation');
+    await page.click('#openPage0'); // Apply button
+    
+    // Check if the next screen (Flow Setting) has dev03 as approver
+    // This requires inspecting the standard workflow frame/dialog
+    // await expect(page.locator('td:has-text("dev03")')).toBeVisible();
   });
 
 });

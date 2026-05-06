@@ -30,6 +30,10 @@
 *   **Tag Syntax**: Avoid whitespace between `<col>` and `<showIcon />` to ensure correct JSSP parsing.
 *   **SPA Logic**: Use `imuiDialog` for Add/Edit instead of navigating to new pages.
 
-## 6. Testing Requirements
-*   Every feature must have a corresponding test case in `test_cases.md`.
-*   Complex UI flows should be automated using Playwright.
+## 7. Workflow Standards (practice_wf)
+*   **Node Configuration**: Use `imwNodeSetting` (CSJS) for UI-side node control and `ApplyParamInfo` (SSJS) for server-side logic.
+*   **Property Naming**: 
+    - **Frontend (HTML)**: Use `DCNodeSetting`, `HVNodeSetting`, `processTargetConfigs` (plural), `processTargetConfigModel` (singular for HV expansion).
+    - **Backend (JS)**: Use `DCNodeConfigModels`, `HVNodeConfigModels`, and include both nested and flat properties (`pluginId`, `parameter`) for maximum compatibility.
+*   **Routing Priority**: Always define business rules clearly (e.g., `leave_days >= 7` -> `dev03`).
+*   **Transaction Integrity**: Perform data persistence (`saveLeaveData`) within the `apply` and `tempSave` functions of the action process to ensure it atomic with the workflow application.

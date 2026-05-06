@@ -1,180 +1,70 @@
-# IM-Workflow Scripting & Customization Guide
+# Intra-mart Workflow Scripting Guide
 
-This guide covers advanced techniques for controlling Intra-mart workflows through Server-side JavaScript (JSSP).
+This guide covers advanced scripting for IM-Workflow, focusing on dynamic node control and server-side logic hooks.
 
----
+## 1. Action Process Hooks
+Action processes are SSJS files that execute during workflow events (apply, approve, etc.).
 
-## 1. Dynamic Operator Setting Patterns
+### 1.1. Key Functions
+- `apply(parameter, userParameter)`: Executed during application.
+- `approve(parameter, userParameter)`: Executed during approval.
+- `tempSaveCreate(parameter, userParameter)`: Executed during temporary save creation.
 
-### A. Dynamic Node (Who approves)
-*   **Purpose**: To specify the approver for a node that is marked as "Dynamic" in the Designer.
-*   **Key Class**: `ConfigDynamicNodeToProcessInfo`
-*   **Docs**: [ConfigDynamicNodeToProcessInfo API](https://api.intra-mart.jp/iap/apilist-ssjs/doc/im_workflow/ConfigDynamicNodeToProcessInfo/index.html)
-*   **Example**:
+### 1.2. The `parameter` (ApplyParamInfo)
+The `parameter` object is the most critical argument. Modifying it allows you to control the workflow engine's behavior.
+
+**Robust Node Configuration Pattern:**
+Always set both the standard IAP (nested) and the SSJS fallback (flat) properties to ensure cross-version compatibility.
+
 ```javascript
-var dynamicNode = new ConfigDynamicNodeToProcessInfo();
-dynamicNode.nodeId = "node_id";
-dynamicNode.setProcessTargetConfigs([{ pluginId: "...", parameter: "user_001" }]);
-```
-
-### B. Expansion Node (Horizontal/Vertical)
-*   **Purpose**: To multiply 1 node into many (Parallel/Sequential).
-*   **Key Class**: `HorizontalAndVerticalNodeConfigInfo`
-*   **Docs**: [HorizontalAndVerticalNodeConfigInfo API](https://api.intra-mart.jp/iap/apilist-ssjs/doc/im_workflow/HorizontalAndVerticalNodeConfigInfo/index.html)
-*   **Example**:
-```javascript
-var nodeConfig = new HorizontalAndVerticalNodeConfigInfo();
-nodeConfig.nodeId = "expansion_node";
-nodeConfig.setOperatorType("0"); // 0: Horizontal
-nodeConfig.setProcessTargetConfigs([...]);
-```
-
-### C. Confirmation Node (FYI)
-*   **Purpose**: To specify who receives a notification after a step.
-*   **Key Class**: `ConfigConfirmNodeToProcessInfo`
-*   **Docs**: [ConfigConfirmNodeToProcessInfo API](https://api.intra-mart.jp/iap/apilist-ssjs/doc/im_workflow/ConfigConfirmNodeToProcessInfo/index.html)
-
----
-
-## 2. Dynamic Logic via Plugins (The practice_wf Pattern)
-
-### A. Dynamic Branching (Rule Condition)
-Implemented via `execute(parameter)` in a Rule script. Returns `result.data = true` to take the branch.
-
-### B. Authority Plugins
-Implemented via `WorkflowAuthorityExecEventListener.js`. Dynamically calculates the approver list at runtime.
-
----
-
-## 3. IM Plugin Development (Standardizing)
-
-To register your JSSP scripts as official selectable plugins, use a `plugin.xml` file.
-
-### Common Extension Points
-*   **Authority**: `jp.co.intra_mart.workflow.plugin.authority.item`
-*   **Action**: `jp.co.intra_mart.workflow.plugin.action.process`
-
-### Sample `plugin.xml`
-```xml
-<plugin>
-  <extension point="jp.co.intra_mart.workflow.plugin.authority.item">
-    <item id="my_plugin" script="path/to/script" name="My Plugin" />
-  </extension>
-</plugin>
-```
-
----
-
-## 4. Setting Dynamic Nodes during Approval (Cookbook 110547)
-
-In many business cases, a middle approver (not the applier) decides who the *next* dynamic node operator will be. This is handled during the **Approve** action.
-
-### Implementation Pattern:
-```javascript
-var workflowManager = new WorkflowManager();
-
-// 1. Define the next operator
-var nextDynamicNode = new ConfigDynamicNodeToProcessInfo();
-nextDynamicNode.nodeId = "next_dynamic_node_id";
-nextDynamicNode.setProcessTargetConfigs([{ 
-    pluginId: "jp.co.intra_mart.workflow.plugin.authority.user", 
-    parameter: "manager_002" 
-}]);
-
-// 2. Approve and set the next person
-var processParam = {
-    systemMatterId: "...",
-    userCode: "current_approver_code",
-    nodeId: "current_node_id",
-    status: "approve",
-    // Set the dynamic node for the NEXT step
-    dynamicNodeParameter: [nextDynamicNode]
-};
-
-var result = workflowManager.approve(processParam);
-```
-*   **Cookbook Reference**: [Cookbook 110547: Setting Dynamic Nodes via JS API](https://dev-portal.intra-mart.jp/cookbook/cookbook110547/)
-
----
-
-## 5. Declarative Setting via User Data (`DCNodeSetting`)
-
-Instead of calling Java/JS APIs, you can pass a specific JSON structure within your workflow user data. The system automatically parses these based on the key:
-
-| Key Name | Target Node Type |
-|:--- |:--- |
-| **`DCNodeSetting`** | Dynamic Node |
-| **`HVNodeSetting`** | Horizontal/Vertical Expansion Node |
-| **`CSNodeSetting`** | Confirmation Node |
-
-### JSON Examples:
-
-#### 1. Dynamic Node (`DCNodeSetting`)
-```json
-{
-  "DCNodeSetting": {
-    "node_id": {
-      "displayFlag": true,
-      "processTargetConfigs": [{
-        "extensionPointId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-        "pluginId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-        "parameter": "user_code"
-      }]
-    }
-  }
+function apply(parameter, userParameter) {
+    var dynamicNode = {
+        nodeId: "zzz_dnm_01",
+        // Nested structure
+        processTargetConfigs: [{
+            extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+            pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+            parameter: "dev08"
+        }],
+        // Flat structure fallback
+        pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+        parameter: "dev08"
+    };
+    
+    parameter.DCNodeConfigModels = [dynamicNode];
+    return { resultFlag: true };
 }
 ```
 
-#### 2. Expansion Node (`HVNodeSetting`)
-```json
-{
-  "HVNodeSetting": {
-    "node_id": {
-      "displayFlag": true,
-      "matterNodeExpansions": [
-        {
-          "nodeName": "Node Name 001",
-          "processTargetConfigModel": [{
-            "extensionPointId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-            "pluginId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-            "parameter": "user_01"
-          }]
-        },
-        {
-          "nodeName": "Node Name 002",
-          "processTargetConfigModel": [{
-            "extensionPointId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-            "pluginId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-            "parameter": "user_02"
-          }]
-        }
-      ]
-    }
-  }
-}
-```
+## 2. UI-Side Node Control (imwNodeSetting)
+If server-side logic fails or is restricted, use the `imwNodeSetting` JSON in the HTML form.
 
-### Client-side (CSJS) Implementation:
-You can dynamically inject these configurations into the standard Intra-mart workflow form by setting the `imwNodeSetting` hidden input:
+### 2.1. Structural Rules
+- **DCNodeSetting**: For dynamic nodes.
+- **HVNodeSetting**: For horizontal/vertical nodes.
+
+### 2.2. Configuration Flags
+| Flag | Description |
+| :--- | :--- |
+| `displayFlag` | `false` to hide the node from the user in the "Flow Settings" tab. |
+| `enableFlag` | `true` to enable the dynamic setting. |
 
 ```javascript
 var nodeSetting = {
-    DCNodeSetting: { /* ... */ },
-    HVNodeSetting: { /* ... */ }
+    "DCNodeSetting": {
+        "node_id": {
+            "displayFlag": false,
+            "enableFlag": true,
+            "processTargetConfigs": [ { "pluginId": "...", "parameter": "..." } ]
+        }
+    }
 };
-var nodeSettingJson = ImJson.toJSONString(nodeSetting);
-
-if ($('input[name=imwNodeSetting]').length === 0) {
-    $("#workflowOpenPageForm").append('<input type="hidden" name="imwNodeSetting" />');
-}
-$('input[name=imwNodeSetting]').val(nodeSettingJson);
 ```
-*   **Reference**: [Customize Guide 24: User Data Parameters](https://document.intra-mart.jp/library/iap/public/im_workflow/im_workflow_programming_guide/texts/customize/dynamic_operator_setting/customize_guide_24.html)
+
+## 3. Best Practices
+1.  **Atomicity**: Always perform business data saving (DB operations) inside the workflow hooks to ensure data consistency with the workflow state.
+2.  **Validation**: Perform UI-side validation before calling `workflowOpenPage`.
+3.  **Logging**: Use `Debug.console()` to inspect the `parameter` object during development.
 
 ---
-## 4. Useful Links
-*   [Overall Guide: Dynamic Operator Setting](https://document.intra-mart.jp/library/iap/public/im_workflow/im_workflow_programming_guide/texts/customize/dynamic_operator_setting/customize_guide_26.html)
-*   [API List: WorkflowManager](https://api.intra-mart.jp/iap/apilist-ssjs/doc/im_workflow/WorkflowManager/index.html)
-
----
-*Last Updated: 2026-05-05 by AI Research Agent*
+*Last Updated: 2026-05-06 by AI Research Agent*

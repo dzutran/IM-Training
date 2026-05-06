@@ -35,23 +35,54 @@
     }
 
     function setNodeDisplayFlags() {
+      // 1. Logic for Dynamic Node (zzz_dnm_01)
+      var days = parseInt($('input[name="leave_days"]').val()) || 0;
+      var approver = "dev07";
+      if (days >= 7) approver = "dev03";
+      else if (days >= 3) approver = "dev08";
+
+      var dynamicPlugin = {
+        extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+        pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+        parameter: approver
+      };
+
+      // 2. Logic for Horizontal Expansion Node (zzz_hrz_01)
+      var itemTotal = parseInt($('input[name="item_total"]').val()) || 0;
+      var hrzApproverList = ["dev08", "dev07", "dev03"];
+      var hrzApprovers = [hrzApproverList[0]];
+
+      if (itemTotal > 100000) {
+        hrzApprovers = hrzApproverList;
+      } else if (itemTotal > 50000) {
+        hrzApprovers = hrzApproverList.slice(0, 2);
+      }
+
+      var expansions = [];
+      for (var i = 0; i < hrzApprovers.length; i++) {
+        expansions.push({
+          nodeName: "Approval (" + hrzApprovers[i] + ")",
+          processTargetConfigModel: [{
+            extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+            pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+            parameter: hrzApprovers[i]
+          }]
+        });
+      }
+
       var nodeSetting = {
         "DCNodeSetting": {
           "zzz_dnm_01": { 
             "displayFlag": false, 
             "enableFlag": true,
-            "searchConditionConfigurableFlag": false,
-            "referentialExtraConfigurableFlag": false,
-            "processTargetConfigs": [] 
+            "processTargetConfigs": [dynamicPlugin] 
           }
         },
         "HVNodeSetting": {
           "zzz_hrz_01": { 
             "displayFlag": false, 
             "enableFlag": true,
-            "searchConditionConfigurableFlag": false,
-            "referentialExtraConfigurableFlag": false,
-            "matterNodeExpansions": [] 
+            "matterNodeExpansions": expansions 
           }
         }
       };

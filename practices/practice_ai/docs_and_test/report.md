@@ -9,6 +9,9 @@ Refactor and standardize the "practice_ai" module into a professional, robust, a
 *   **JSSP RPC**: Asynchronous communication between Client (HTML/JS) and Server (JS/Common).
 *   **2waySQL**: Used for dynamic and safe SQL execution with `/*IF*/`, `/*BEGIN*/`, and bind parameters.
 *   **Data Access Layer (DAL)**: Centralized logic in `common.js` to ensure consistent data structures and error handling.
+*   **Workflow Action Hooks**: Custom logic in `action_process.js` to handle dynamic routing and data persistence during workflow events.
+*   **Dynamic Node Routing**: Hybrid approach for node configuration to ensure cross-version compatibility.
+*   **Expansion Logic**: Programmatic horizontal node expansion based on business parameters (e.g., total amount).
 
 ## 3. Features Implemented
 *   **List Table**: Advanced `imuiListTable` (jqGrid) with sorting, paging, and custom icon columns.

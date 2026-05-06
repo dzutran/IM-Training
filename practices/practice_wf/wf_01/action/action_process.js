@@ -18,78 +18,10 @@ function apply(parameter, userParameter) {
     return result;
   }
 
-  // --- Refactored: Standard Dynamic Node Setting ---
-  // Using a robust structure to cover both older and newer SSJS API interpretations
-
-  // 1. Dynamic Node (zzz_dnm_01) logic based on leave_days
-  var days = parseInt(userParameter.leave_days) || 0;
-  var approver = "dev08"; // Default
-  if (days >= 7) approver = "dev03";
-  else if (days >= 3) approver = "dev08";
-  else approver = "dev07";
-
-  var dynamicPlugin = {
-    extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-    pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-    parameter: approver
-  };
-
-  var dynamicNode = {
-    nodeId: "zzz_dnm_01",
-    // Standard IAP structure (Nested)
-    processTargetConfigs: [dynamicPlugin],
-    // Alternative SSJS structure (Flat)
-    extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-    pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-    parameter: approver,
-    pluginParameter: approver
-  };
-
-  // 2. Horizontal Expansion Node (zzz_hrz_01) logic based on item_total
-  var itemTotal = parseInt(userParameter.item_total) || 0;
-  var hrzApproverList = ["dev08", "dev07", "dev03"];
-  var hrzApprovers = [hrzApproverList[0]]; // Default
-
-  if (itemTotal > 100000) {
-    hrzApprovers = hrzApproverList;
-  } else if (itemTotal > 50000) {
-    hrzApprovers = hrzApproverList.slice(0, 2);
-  }
-
-  var hrzNode = {
-    nodeId: "zzz_hrz_01",
-    matterNodeExpansions: []
-  };
-
-  for (var i = 0; i < hrzApprovers.length; i++) {
-    var hrzPlugin = {
-      extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-      pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-      parameter: hrzApprovers[i]
-    };
-
-    var exp = {
-      nodeName: "Approval (" + hrzApprovers[i] + ")",
-      // For HV expansion, singular 'processTargetConfigModel' is standard
-      processTargetConfigModel: [hrzPlugin],
-      // Adding flat properties just in case
-      extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-      pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-      parameter: hrzApprovers[i]
-    };
-    hrzNode.matterNodeExpansions.push(exp);
-  }
-
-  // Apply to workflow parameter object (ApplyParamInfo)
-  // Set both variants to ensure compatibility across versions
-  parameter.DCNodeConfigModels = [dynamicNode];
-  parameter.dynamicAndCnfmNodeConfigModels = [dynamicNode]; // Lowercase variant seen in some SSJS docs
+  // --- Rolled back: Node logic moved to UI (HTML/CSJS) ---
   
-  parameter.HVNodeConfigModels = [hrzNode];
-  parameter.horizontalAndVerticalNodeConfigModels = [hrzNode];
-
-  // Log the final parameter object as requested
-  Debug.console('ZZZ final parameter', parameter);
+  // Log final state for debugging
+  Debug.console('ZZZ final parameter (server)', parameter);
 
   return result;
 }
