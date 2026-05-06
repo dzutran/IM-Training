@@ -8,7 +8,8 @@ Based on the V7.2 Programming Guide, this document outlines practical rules and 
 ## 1. Parameter Handling Rules
 - **DO NOT** modify parameters prefixed with `imw` inside your handlers. These are reserved for the system.
 - **Use for Routing**: Leverage `imwNodeId` to implement conditional business logic (e.g., specific validation only at the "Department Manager" node).
-- **Return Paths**: Always include `imwCallOriginalPagePath` when navigating between lists and workflow screens to ensure a smooth user experience.
+- **Return Paths**: Always include `imwCallOriginalPagePath` when navigating between lists and workflow screens to ensure a smooth user experience. (Format: `folder/subfolder/file_name` without `view/` or extension).
+  - *Example*: `training/dzu/practices/practice_wf/wf_02/wf_zzz_02`
 
 ## 2. Data Synchronization (Action Handlers)
 - **Primary Rule**: Critical application data updates must happen during the **Action Processing** phase.

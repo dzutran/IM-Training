@@ -34,7 +34,7 @@ function onApplyNew() {
   var url = 'im_workflow/common/switch/switch_content?' +
             'imwPageType=0' + // Application Mode
             '&imwFlowId=' + flowId +
-            '&imwCallOriginalPagePath=dzu/practices/practice_wf/wf_02/wf_zzz_02';
+            '&imwCallOriginalPagePath=training/dzu/practices/practice_wf/wf_02/wf_zzz_02';
   window.open(url, '_blank');
 }
 ```
