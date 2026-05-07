@@ -13,7 +13,9 @@ Before writing any code or proposing a plan:
 
 ## 2. Implementation Standards
 - **UI**: Use standard `imui` tags and layout. Do NOT use custom CSS unless strictly necessary.
-- **Backend (SSJS)**: Follow the JSSP RPC pattern. Keep business logic in `common` and database calls in SQL templates.
+- **Backend (SSJS)**: 
+  - Follow the JSSP RPC pattern. Keep business logic in `common` and database calls in SQL templates.
+  - **JSSP PAIRING RULE**: JSSP files (.html and .js) are "a pair born in heaven". They MUST stay in the same directory and have the same name. The .js file contains the `init` function required for page rendering. NEVER separate them during restructuring.
 - **Workflow**: 
   - Use `imwNodeSetting` (JSON) in the frontend for dynamic routing.
   - Data persistence must happen in the Action Handler (`apply`, `approve`, etc.).

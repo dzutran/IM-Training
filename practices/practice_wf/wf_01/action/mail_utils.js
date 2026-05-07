@@ -17,8 +17,8 @@ var MailUtils = (function () {
                     targetEmail = Contexts.getAccountContext().mailAddress || targetEmail;
                 }
 
-                // 0. Xây dựng URL điều hướng (Dạng Direct Reference)
-                var url = "http://192.168.0.201:8082/imart/im_workflow/user/reference/reference_direct/" + details.systemMatterId;
+                // 0. Xây dựng URL điều hướng (Ưu tiên processUrl cho người xử lý, mặc định referenceUrl cho người xem)
+                var url = details.processUrl || ("http://192.168.0.201:8082/imart/im_workflow/user/reference/reference_direct/" + details.systemMatterId);
 
                 // 1. Xây dựng nội dung Plain Text (Dành cho các trình đọc mail cũ)
                 var body = "Chào " + (details.applyUserName || userCd) + ",\n\n" +

@@ -37,28 +37,56 @@ function execute(parameter) {
         var baseUrl = "http://192.168.0.201:8082/imart/"; // Nên lấy từ config nếu có thể
         var processUrl = baseUrl + "im_workflow/user/process/process_direct/" + parameter.systemMatterId + "/" + parameter.nodeId;
         
-        // Giữ nguyên các từ khóa chuyên môn bằng tiếng Anh để dễ tra cứu (Dev standards)
-        var statusLabel = parameter.preNodeResultStatus;
-        if (statusLabel === "approve") statusLabel = "Approve";
-        else if (statusLabel === "apply") statusLabel = "Apply";
-        else if (statusLabel === "sendback") statusLabel = "Send back";
-        else if (statusLabel === "pullback") statusLabel = "Pull back";
+        // 1. Phân loại và xây dựng nội dung mail theo trạng thái (Professional Labeling)
+        var mailConfig = {
+            subject: "Thông báo Workflow",
+            statusText: "Đang xử lý"
+        };
 
-        // Xây dựng nội dung mail
-        var subject = "Đơn workflow đã đến bước: " + parameter.nodeId;
-        var body = "Thông báo: Đơn workflow của bạn đã được chuyển đến một bước mới.\n\n" +
-                    "Chi tiết trình trạng:\n" +
-                    "- Node hiện tại: " + parameter.nodeId + "\n" +
-                    "- Hành động từ node trước: " + (statusLabel || "N/A") + "\n" +
-                    "- Mã đơn (Matter ID): " + parameter.systemMatterId + "\n" +
-                    "- Tên đơn: " + parameter.matterName + "\n" +
-                    "- Lý do đơn: " + (currentData.leave_reason || "N/A") + "\n\n" +
-                    "Link xử lý trực tiếp: " + processUrl + "\n\n" +
-                    "Vui lòng truy cập hệ thống để xử lý.";
+        switch (parameter.preNodeResultStatus) {
+            case "apply":
+                mailConfig.subject = "Yêu cầu phê duyệt đơn mới";
+                mailConfig.statusText = "Mới khởi tạo (Apply)";
+                break;
+            case "approve":
+                mailConfig.subject = "Thông báo: Đơn đã được phê duyệt ở bước trước";
+                mailConfig.statusText = "Đã phê duyệt (Approve)";
+                break;
+            case "sendback":
+                mailConfig.subject = "Cảnh báo: Đơn bị TRẢ VỀ (Send Back)";
+                mailConfig.statusText = "Bị trả về (Send Back)";
+                break;
+            case "pullback":
+                mailConfig.subject = "Thông báo: Đơn đã được thu hồi (Pull Back)";
+                mailConfig.statusText = "Đã thu hồi (Pull Back)";
+                break;
+            case "deny":
+                mailConfig.subject = "Thông báo: Đơn đã bị TỪ CHỐI (Deny)";
+                mailConfig.statusText = "Bị từ chối (Deny)";
+                break;
+            default:
+                mailConfig.subject = "Đơn workflow đã đến bước: " + parameter.nodeId;
+                mailConfig.statusText = parameter.preNodeResultStatus || "Chuyển bước";
+        }
 
-        // Gửi mail cho người xử lý ở node trước (hoặc applicant tùy logic nghiệp vụ)
-        // Ở đây ta gửi cho preNodeAuthUserCd để thông báo cho người tiếp theo hoặc người liên quan
-        MailUtils.sendSimpleNotification(parameter.preNodeAuthUserCd || Contexts.getAccountContext().userCd, subject, body);
+        // 2. Chuẩn bị dữ liệu chi tiết cho Template HTML
+        var mailDetails = {
+            systemMatterId: parameter.systemMatterId,
+            matterName: parameter.matterName,
+            reason: currentData.leave_reason || "Không có lý do",
+            days: currentData.leave_days || "0",
+            applyUserName: parameter.applyUserName || "Người dùng",
+            nodeName: parameter.nodeId,
+            processUrl: processUrl // Truyền URL xử lý trực tiếp vào Mail Details
+        };
+
+        // 3. Gửi mail HTML chuyên nghiệp
+        // Ưu tiên gửi cho danh sách người xử lý ở node hiện tại
+        var targetUsers = parameter.nodeAuthUserCdList || [parameter.preNodeAuthUserCd];
+        
+        for (var i = 0; i < targetUsers.length; i++) {
+            MailUtils.sendNotification(targetUsers[i], mailConfig.subject, mailDetails);
+        }
         
     } catch (e) {
         // Lỗi ở đây không rollback transaction của workflow

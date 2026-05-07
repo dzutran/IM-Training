@@ -30,7 +30,7 @@ function init(request) {
   try {
     var confirm = MessageManager.getMessage('CAP.Z.IWP.COMMON.CONFIRM.TITLE');
     if (confirm) $data.msgConfirmTitle = confirm;
-    
+
     var error = MessageManager.getMessage('CAP.Z.IWP.COMMON.ERROR.TITLE');
     if (error) $data.msgErrorTitle = error;
   } catch (e) {
