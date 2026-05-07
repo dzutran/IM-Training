@@ -1,7 +1,10 @@
-# Research 06: Modern Dashboard Design Patterns in Intra-mart
+# Research 07: Advanced UI Customization in Intra-mart
+
+> [!CAUTION]
+> **WARNING**: The modern design patterns described in this document (Gradients, Custom Fonts, Glassmorphism) are considered "Advanced Customizations". They may NOT comply with standard corporate UI guidelines (imui). Use these only for specific projects where a custom "Wow" factor is explicitly requested and approved.
 
 ## Context
-Intra-mart's default UI (imui) can sometimes feel utilitarian. This research explores how to overlay modern CSS design trends onto the existing framework to create a "Premium/Enterprise" experience.
+Intra-mart's default UI (imui) can sometimes feel utilitarian. This research explores how to overlay modern CSS design trends onto the existing framework for specific high-end use cases.
 
 ## Design Patterns Explored
 

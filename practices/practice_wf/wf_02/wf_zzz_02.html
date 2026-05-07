@@ -1,140 +1,16 @@
 <html>
 <imart type="head">
-  <title>Workflow Executive Dashboard</title>
-
-  <!-- Import Modern Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>Workflow Monitor (Standard UI)</title>
 
   <style type="text/css">
-    /* 1. Global Reset & Modern Typography */
-    body {
-      background-color: #f4f7fc;
-      font-family: 'Outfit', 'Helvetica Neue', Arial, sans-serif !important;
-      color: #334155;
-    }
-
-    /* 2. Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-up {
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    /* 3. Header Styling - Fixed overlap */
-    .imui-title {
-      background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
-      padding: 20px 30px !important;
-      margin: 0 0 30px 0 !important;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .imui-title h1 {
-      color: #ffffff !important;
-      font-weight: 600 !important;
-      letter-spacing: -0.5px;
-    }
-
-    /* 4. Dashboard Summary Cards */
-    .dashboard-header {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    .stat-card {
-      flex: 1;
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      border-bottom: 4px solid #3b82f6;
-      transition: transform 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .stat-card.important {
-      border-bottom-color: #ef4444;
-    }
-
-    .stat-label {
-      font-size: 13px;
-      color: #64748b;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    /* 5. Modern Search Card */
-    .search-card {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      margin-bottom: 30px;
-      border: 1px solid #e2e8f0;
-    }
-
-    /* 6. List Enhancements */
-    .imui-form-container-wide {
-      background: #ffffff !important;
-      border-radius: 12px !important;
-      padding: 20px !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-      border: none !important;
-    }
-
+    /* Chỉ giữ lại các style cần thiết cho logic hiển thị, loại bỏ trang trí hiện đại */
     .im-workflow-highlight-row {
-      background-color: #fffbeb !important;
+      background-color: #fff0f0 !important; /* Màu highlight đỏ nhạt chuẩn workflow */
     }
-
-    .matter-id-link {
-      color: #2563eb !important;
-      font-weight: 600;
-      text-decoration: none !important;
-      padding: 4px 8px;
-      background: #eff6ff;
-      border-radius: 6px;
-      transition: all 0.2s;
-    }
-
-    .matter-id-link:hover {
-      background: #dbeafe;
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
-    }
-
-    /* 7. Status Badge */
-    .status-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-    }
-
-    .status-hot {
-      background: #fee2e2;
-      color: #b91c1c;
-      border-color: #fecaca;
+    
+    .status-hot-text {
+      color: #ff0000;
+      font-weight: bold;
     }
   </style>
 
@@ -149,15 +25,12 @@
           return;
         }
         $("#matterTable").clearGridData().setGridParam({ data: res.data }).trigger("reloadGrid");
-        // Cập nhật thống kê nhanh
-        $("#totalCount").text(res.data.length);
       }
     }
 
     function onGridComplete() {
       var $grid = $(this);
       var ids = $grid.jqGrid('getDataIDs');
-      var importantCount = 0;
 
       for (var i = 0; i < ids.length; i++) {
         var rowId = ids[i];
@@ -171,19 +44,15 @@
           '&imwFlowId=' + rowData.flow_id +
           '&imwCallOriginalPagePath=training/dzu/practices/practice_wf/wf_02/wf_zzz_02';
 
-        var linkHtml = '<a href="' + url + '" target="_blank" class="matter-id-link">' + rowData.system_matter_id + '</a>';
+        var linkHtml = '<a href="' + url + '" target="_blank">' + rowData.system_matter_id + '</a>';
         $grid.setCell(rowId, 'system_matter_id', linkHtml);
-
-        var statusClass = (rowData.node_id === 'zzz_approve_01') ? 'status-badge status-hot' : 'status-badge';
-        $grid.setCell(rowId, 'node_id', '<span class="' + statusClass + '">' + rowData.node_id + '</span>');
 
         if (rowData.node_id === 'zzz_approve_01') {
           $grid.find('#' + rowId).addClass('im-workflow-highlight-row');
-          $grid.setCell(rowId, 'matter_name', '<span style="color:#b91c1c;font-weight:600;">🚩 ' + rowData.matter_name + '</span>');
-          importantCount++;
+          $grid.setCell(rowId, 'node_id', '<span class="status-hot-text">' + rowData.node_id + '</span>');
+          $grid.setCell(rowId, 'matter_name', '🚩 ' + rowData.matter_name);
         }
       }
-      $("#importantCount").text(importantCount);
     }
 
     function onSearch() {
@@ -191,96 +60,56 @@
       monitorApi.getList({ flowId: flowId });
     }
 
-    /**
-     * Mở màn hình Apply cho Flow ID hiện tại
-     */
     function onApplyNew() {
       var flowId = $("#searchFlowId").val();
       if (!flowId) {
         imuiAlert("Please enter a Flow ID first.");
         return;
       }
-
-      // imwPageType=0 là màn hình Application
       var url = 'im_workflow/common/switch/switch_content?' +
         'imwPageType=0' +
         '&imwFlowId=' + flowId +
         '&imwCallOriginalPagePath=training/dzu/practices/practice_wf/wf_02/wf_zzz_02';
-
       window.open(url, '_blank');
     }
   </script>
 </imart>
 
 <div class="imui-title">
-  <h1>Workflow Intelligence Monitor</h1>
+  <h1>Workflow Monitor</h1>
 </div>
 
-<imui-container-main class="animate-up">
-
-  <!-- Dashboard Summary Section -->
-  <div class="dashboard-header">
-    <div class="stat-card">
-      <div class="stat-label">Total Active Matters</div>
-      <div class="stat-value" id="totalCount">
-        <imart type="string" value=$data.matters.length />
-      </div>
-    </div>
-    <div class="stat-card important">
-      <div class="stat-label">Critical Pending Nodes</div>
-      <div class="stat-value" id="importantCount">0</div>
-    </div>
-    <div class="stat-card" style="border-bottom-color: #10b981;">
-      <div class="stat-label">Last Refresh</div>
-      <div class="stat-value" style="font-size: 16px; margin-top: 8px;">
-        <script>document.write(new Date().toLocaleTimeString())</script>
-      </div>
-    </div>
-  </div>
-
-  <!-- Search Card -->
-  <div class="search-card">
-    <div class="imui-chapter-title">
-      <h2 style="border:none; margin:0; padding:0; font-weight:600; color:#1e293b;">Flow Parameters</h2>
-    </div>
-    <div style="margin-top: 20px;">
-      <table class="imui-form">
-        <tr>
-          <th width="140" style="background:none;"><label style="font-weight:600; color:#475569;">Target Flow ID</label>
-          </th>
-          <td width="320">
-            <input type="text" id="searchFlowId" value="wf_zzz_01" class="imui-text"
-              style="width: 280px; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;" />
-          </td>
-          <td>
-            <imart type="imuiButton" id="searchBtn" value="Execute Analysis" iconClass="im-ui-icon-common-16-search"
-              class="imui-button imui-button-primary"
-              style="padding: 0 40px; height: 40px; font-weight: 600; border: none; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);"
-              onclick="onSearch()" />
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- Main Table Container -->
+<imui-container-main>
+  <!-- Search Area (Standard imuiForm) -->
   <div class="imui-form-container-wide">
-    <div class="imui-chapter-title"
-      style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="font-weight:600; color:#1e293b; border: none; margin: 0; padding: 0;">
-        <span class="im-ui-icon-common-16-list"></span> Monitoring Stream
-      </h2>
+    <div class="imui-chapter-title">
+      <h2>Search Condition</h2>
+    </div>
+    <table class="imui-form">
+      <tr>
+        <th width="15%"><label>Flow ID</label></th>
+        <td width="35%">
+          <input type="text" id="searchFlowId" value="wf_zzz_01" />
+        </td>
+        <td class="align-right">
+          <imart type="imuiButton" id="searchBtn" value="Search" class="imui-button" onclick="onSearch()" />
+        </td>
+      </tr>
+    </table>
+  </div>
 
-      <!-- Nút Apply New sử dụng thẻ button thuần để đảm bảo hiển thị -->
-      <button type="button" id="applyBtn" class="imui-button imui-button-primary"
-        style="font-weight: 600; padding: 6px 15px; display: flex; align-items: center; gap: 8px;"
-        onclick="onApplyNew()">
-        <span class="im-ui-icon-common-16-edit"></span>
-        <span>Create New Application</span>
-      </button>
+  <br/>
+
+  <!-- List Area -->
+  <div class="imui-form-container-wide">
+    <div class="imui-chapter-title">
+      <h2>Matter List</h2>
+      <div class="imui-operation-parts">
+        <imart type="imuiButton" id="applyBtn" value="Apply New" iconClass="im-ui-icon-common-16-edit" onclick="onApplyNew()" />
+      </div>
     </div>
 
-    <imart type="imuiListTable" id="matterTable" data=$data.matters height="480" rowNumbers="true"
+    <imart type="imuiListTable" id="matterTable" data=$data.matters height="400" rowNumbers="true"
       onGridComplete="onGridComplete" autoWidth="true" shrinkToFit="true">
       <cols>
         <col name="system_matter_id" caption="System ID" width="180" align="center" />
