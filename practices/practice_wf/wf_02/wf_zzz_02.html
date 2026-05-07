@@ -105,9 +105,21 @@
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
       <h2>Matter List</h2>
-      <div class="imui-operation-parts">
-        <imart type="imuiButton" id="applyBtn" label="Apply New" iconClass="im-ui-icon-common-16-edit"
-          class="imui-button imui-operation-parts-button" onclick="onApplyNew()" />
+    </div>
+
+    <!-- Toolbar Area -->
+    <div class="imui-toolbar-wrap">
+      <div class="imui-toolbar">
+        <ul>
+          <li>
+            <imart type="imuiButton" id="applyBtn" label="Apply New" iconClass="im-ui-icon-common-16-edit"
+              onclick="onApplyNew()" />
+          </li>
+          <li>
+            <imart type="imuiButton" id="refreshBtn" label="Refresh List" iconClass="im-ui-icon-common-16-refresh"
+              onclick="onSearch()" />
+          </li>
+        </ul>
       </div>
     </div>
 
