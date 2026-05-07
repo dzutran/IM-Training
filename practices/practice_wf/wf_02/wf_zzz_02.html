@@ -5,9 +5,10 @@
   <style type="text/css">
     /* Chỉ giữ lại các style cần thiết cho logic hiển thị, loại bỏ trang trí hiện đại */
     .im-workflow-highlight-row {
-      background-color: #fff0f0 !important; /* Màu highlight đỏ nhạt chuẩn workflow */
+      background-color: #fff0f0 !important;
+      /* Màu highlight đỏ nhạt chuẩn workflow */
     }
-    
+
     .status-hot-text {
       color: #ff0000;
       font-weight: bold;
@@ -98,14 +99,17 @@
     </table>
   </div>
 
-  <br/>
+  <br />
 
   <!-- List Area -->
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
       <h2>Matter List</h2>
       <div class="imui-operation-parts">
-        <imart type="imuiButton" id="applyBtn" value="Apply New" iconClass="im-ui-icon-common-16-edit" onclick="onApplyNew()" />
+        <a href="javascript:void(0);" onclick="onApplyNew()" class="imui-button imui-operation-parts-button">
+          <span class="im-ui-icon-common-16-edit"></span>
+          <span>Apply New</span>
+        </a>
       </div>
     </div>
 
