@@ -53,8 +53,8 @@ Based on the V7.2 Programming Guide, this document outlines practical rules and 
       "node_id": {
         "displayFlag": false, 
         "processTargetConfigs": [{
-          "extensionPointId": "...",
-          "pluginId": "...",
+          "extensionPointId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+          "pluginId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
           "parameter": "target_user"
         }]
       }
