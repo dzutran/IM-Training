@@ -93,7 +93,7 @@
           <input type="text" id="searchFlowId" value="wf_zzz_01" />
         </td>
         <td class="align-right">
-          <imart type="imuiButton" id="searchBtn" value="Search" class="imui-button" onclick="onSearch()" />
+          <imart type="imuiButton" id="searchBtn" label="Search" class="imui-button" onclick="onSearch()" />
         </td>
       </tr>
     </table>
@@ -106,10 +106,8 @@
     <div class="imui-chapter-title">
       <h2>Matter List</h2>
       <div class="imui-operation-parts">
-        <a href="javascript:void(0);" onclick="onApplyNew()" class="imui-button imui-operation-parts-button">
-          <span class="im-ui-icon-common-16-edit"></span>
-          <span>Apply New</span>
-        </a>
+        <imart type="imuiButton" id="applyBtn" label="Apply New" iconClass="im-ui-icon-common-16-edit"
+          class="imui-button imui-operation-parts-button" onclick="onApplyNew()" />
       </div>
     </div>
 
