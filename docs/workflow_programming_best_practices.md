@@ -41,3 +41,26 @@ Based on the V7.2 Programming Guide, this document outlines practical rules and 
 - [ ] Test "Back" button behavior (Return Path).
 - [ ] Validate data rollback in case of an approval failure.
 - [ ] Check if email links correctly open the Reference Screen.
+
+## 7. Dynamic Node Routing (Custom Screens)
+- **Primary Mechanism**: Use `imwNodeSetting` (JSON string) in the HTML form to override workflow routing dynamically.
+- **Why**: It is the only standard way to hide the node selection UI and assign approvers programmatically without using unstable Java-level thread injection.
+- **Plugin Recommendation**: Use the verified plugin `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user` for dynamic authority.
+- **Example Pattern**:
+  ```javascript
+  var nodeSetting = {
+    "DCNodeSetting": {
+      "node_id": {
+        "displayFlag": false, 
+        "processTargetConfigs": [{
+          "extensionPointId": "...",
+          "pluginId": "...",
+          "parameter": "target_user"
+        }]
+      }
+    }
+  };
+  ```
+
+---
+*Last Updated: 2026-05-07 by AI Research Agent*

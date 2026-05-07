@@ -11,7 +11,6 @@ var MailUtils = (function () {
          * @param {Object} details - Đối tượng chứa thông tin đơn (systemMatterId, matterName, reason, days, v.v.)
          */
         sendNotification: function (userCd, subject, details) {
-            Debug.print("----- Workflow Mail Notification Start -----");
             try {
                 var targetEmail = userCd + "@intra-mart.local";
                 if (userCd === Contexts.getAccountContext().userCd) {
@@ -74,13 +73,40 @@ var MailUtils = (function () {
 
                 var result = sender.send();
                 if (!result) {
-                    Debug.console("Mail Error: " + sender.getErrorMessage());
+                    // Mail Error
                 } else {
-                    Debug.console("Mail Sent successfully to: " + targetEmail);
+                    // Mail Sent successfully
+                }
+        return result;
+            } catch (e) {
+                return false;
+            }
+        },
+
+        /**
+         * Gửi email thông báo đơn giản (Plain Text)
+         * @param {String} userCd - Mã người dùng nhận mail
+         * @param {String} subject - Tiêu đề
+         * @param {String} body - Nội dung văn bản
+         */
+        sendSimpleNotification: function (userCd, subject, body) {
+            try {
+                var targetEmail = userCd + "@intra-mart.local";
+                
+                var sender = new MailSender();
+                sender.addTo(targetEmail);
+                sender.setSubject("[Workflow ZZZ] " + subject);
+                sender.setText(body);
+                sender.setFrom("system@intra-mart.local", "Workflow System");
+
+                var result = sender.send();
+                if (!result) {
+                    // Simple Mail Error
+                } else {
+                    // Simple Mail Sent successfully
                 }
                 return result;
             } catch (e) {
-                Debug.console("Mail Exception: " + e.message);
                 return false;
             }
         }

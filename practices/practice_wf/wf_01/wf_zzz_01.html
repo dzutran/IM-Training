@@ -34,12 +34,19 @@
       return true;
     }
 
+    /**
+     * Thiết lập các thông số ẩn cho Workflow (Dynamic Node, Horizontal Node)
+     * Giúp ẩn các node không cần thiết trên UI và gán người duyệt tự động.
+     */
     function setNodeDisplayFlags() {
-      // 1. Logic for Dynamic Node (zzz_dnm_01)
+      // 1. Cấu hình cho Dynamic Node (zzz_dnm_01)
       var days = parseInt($('input[name="leave_days"]').val()) || 0;
-      var approver = "dev07";
-      if (days >= 7) approver = "dev03";
-      else if (days >= 3) approver = "dev08";
+      var approver = "dev07"; // Mặc định < 3 ngày
+      if (days >= 7) {
+        approver = "dev03"; // >= 7 ngày
+      } else if (days >= 3) {
+        approver = "dev08"; // 3 - 6 ngày
+      }
 
       var dynamicPlugin = {
         extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
@@ -47,7 +54,7 @@
         parameter: approver
       };
 
-      // 2. Logic for Horizontal Expansion Node (zzz_hrz_01)
+      // 2. Cấu hình cho Horizontal Node (zzz_hrz_01)
       var itemTotal = parseInt($('input[name="item_total"]').val()) || 0;
       var hrzApproverList = ["dev08", "dev07", "dev03"];
       var hrzApprovers = [hrzApproverList[0]];
@@ -70,29 +77,32 @@
         });
       }
 
+      // 3. Xây dựng đối tượng cấu hình Node chuẩn
       var nodeSetting = {
         "DCNodeSetting": {
-          "zzz_dnm_01": { 
-            "displayFlag": false, 
+          "zzz_dnm_01": {
+            "displayFlag": false, // Ẩn node này trên UI chuẩn vì đã gán tự động
             "enableFlag": true,
-            "processTargetConfigs": [dynamicPlugin] 
+            "processTargetConfigs": [dynamicPlugin] // Gán trực tiếp người duyệt ở đây
           }
         },
         "HVNodeSetting": {
-          "zzz_hrz_01": { 
-            "displayFlag": false, 
+          "zzz_hrz_01": {
+            "displayFlag": false,
             "enableFlag": true,
-            "matterNodeExpansions": expansions 
+            "matterNodeExpansions": expansions
           }
         }
       };
 
       var nodeSettingJson = ImJson.toJSONString(nodeSetting);
 
-      if ($('input[name=imwNodeSetting]').length === 0) {
-        $("#workflowOpenPageForm").append('<input type="hidden" name="imwNodeSetting" />');
+      // Nhúng tham số vào form trước khi submit
+      var $form = $("#workflowOpenPageForm");
+      if ($form.find('input[name="imwNodeSetting"]').length === 0) {
+        $form.append('<input type="hidden" name="imwNodeSetting" />');
       }
-      $('input[name=imwNodeSetting]').val(nodeSettingJson);
+      $form.find('input[name="imwNodeSetting"]').val(nodeSettingJson);
     }
 
     $(function () {
@@ -131,6 +141,7 @@
 
       $('#openPage4').click(function () {
         if (!validateRequired()) return false;
+        setNodeDisplayFlags();
         workflowOpenPage('4');
         return false;
       });

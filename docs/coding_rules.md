@@ -31,9 +31,9 @@
 *   **SPA Logic**: Use `imuiDialog` for Add/Edit instead of navigating to new pages.
 
 ## 7. Workflow Standards (practice_wf)
-*   **Node Configuration**: Use `imwNodeSetting` (CSJS) for UI-side node control and `ApplyParamInfo` (SSJS) for server-side logic.
+*   **Routing Priority**: Use `imwNodeSetting` (JSON) in the HTML frontend as the primary mechanism for dynamic and horizontal node routing.
+*   **Backend Role**: The `ActionProcess.js` should focus ONLY on business data persistence and external system integration (e.g., mail). DO NOT use `Packages` to inject routing data unless standard JSON methods are unavailable.
+*   **Plugin IDs**: Always verify the environment-specific plugin ID. (Standard: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user`).
 *   **Property Naming**: 
     - **Frontend (HTML)**: Use `DCNodeSetting`, `HVNodeSetting`, `processTargetConfigs` (plural), `processTargetConfigModel` (singular for HV expansion).
-    - **Backend (JS)**: Use `DCNodeConfigModels`, `HVNodeConfigModels`, and include both nested and flat properties (`pluginId`, `parameter`) for maximum compatibility.
-*   **Routing Priority**: Always define business rules clearly (e.g., `leave_days >= 7` -> `dev03`).
-*   **Transaction Integrity**: Perform data persistence (`saveLeaveData`) within the `apply` and `tempSave` functions of the action process to ensure it atomic with the workflow application.
+*   **Transaction Integrity**: Perform data persistence (`saveLeaveData`) within the `apply` and `tempSave` functions of the action process to ensure it is atomic with the workflow application.

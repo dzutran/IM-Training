@@ -11,6 +11,8 @@ Current focus areas and future topics for the AI Research Agent.
 *   [x] **IMUI Validation**: Rules, custom rules, and UI feedback.
 *   [x] **Hybrid API Logic**: Bridging gaps between SSJS and UI node settings.
 *   [x] **Workflow URLs & System Tables**: Active matter monitoring and switch_content.
+*   [x] **Arrive Process (到達処理)**: Independent logic execution on node arrival.
+
 
 ## 🚀 Future Topics
 *   **IM-LogicDesigner**: Low-code logic replacement for JSSP.
@@ -20,4 +22,4 @@ Current focus areas and future topics for the AI Research Agent.
 *   **Internationalization**: Handling multiple locales in a single module.
 
 ---
-*Last Updated: 2026-05-06 by AI Research Agent*
+*Last Updated: 2026-05-07 by AI Research Agent*

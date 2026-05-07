@@ -1,72 +1,50 @@
 # IM-Workflow Dynamic Node Configuration Research (SSJS)
 
 ## 1. Overview
-To configure dynamic and horizontal nodes during the `apply` process in Intra-mart IM-Workflow, specific structural objects must be injected into the `ApplyParamInfo` (passed as the `parameter` object in `action_process.js`).
+To configure dynamic and horizontal nodes during the `apply` process in Intra-mart IM-Workflow, specific structural objects must be injected. While JSSP injection is possible, the **Frontend (HTML) JSON Injection** is the standard and most robust method for custom screens.
 
-## 2. Structural Requirements
+## 2. Structural Requirements (Frontend imwNodeSetting)
 
-### 2.1. ApplyParamInfo (Root Object)
-The workflow engine looks for specific arrays within the `parameter` object:
-- `DCNodeConfigModels`: `Array<DynamicAndCnfmNodeConfigInfo>` (for Dynamic nodes).
-- `HVNodeConfigModels`: `Array<HorizontalAndVerticalNodeConfigInfo>` (for Horizontal/Vertical nodes).
+### 2.1. Dynamic Node Configuration (zzz_dnm_01)
+**Key:** `DCNodeSetting`
+- `nodeId`: The ID of the node.
+- `displayFlag`: `Boolean` (Set `false` to hide selection UI).
+- `enableFlag`: `Boolean`.
+- `processTargetConfigs`: `Array<PluginInfo>` (The actual approvers).
 
-### 2.2. Dynamic Node Configuration (zzz_dnm_01)
-**Object Type:** `DynamicAndCnfmNodeConfigInfo`
-- `nodeId`: `String` (The ID of the node in the flow definition).
-- `processTargetConfigs`: `Array<PluginInfo>` (Array of plugins to set as process targets).
+### 2.2. Horizontal Node Configuration (zzz_hrz_01)
+**Key:** `HVNodeSetting`
+- `nodeId`: The ID of the node.
+- `matterNodeExpansions`: `Array<MatterNodeExpansionInfo>`.
 
-### 2.3. Horizontal Node Configuration (zzz_hrz_01)
-**Object Type:** `HorizontalAndVerticalNodeConfigInfo`
-- `nodeId`: `String` (The ID of the node in the flow definition).
-- `matterNodeExpansions`: `Array<MatterNodeExpansionInfo>` (Array of node expansion definitions).
+## 3. Recommended Implementation (Standard Pattern)
+The most robust way to set dynamic nodes in a custom screen is to use the `imwNodeSetting` parameter in the HTML form.
 
-### 2.4. Key Differences: JS (Backend) vs HTML (Frontend)
-| Feature | Backend (JS: `ApplyParamInfo`) | Frontend (HTML: `imwNodeSetting`) |
-| :--- | :--- | :--- |
-| **Top-level Keys** | `DCNodeConfigModels`, `HVNodeConfigModels` | `DCNodeSetting`, `HVNodeSetting` |
-| **UI Flags** | **N/A** (Engine-only) | `displayFlag`, `enableFlag` |
-| **HV Target Key** | `processTargetConfigModel` (Singular) | `processTargetConfigModel` (Singular) |
+**Plugin Configuration:**
+- `extensionPointId`: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic`
+- `pluginId`: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user` (Verified for this environment)
 
-### 2.5. Robust Hybrid Structure (Recommended)
-Due to inconsistencies across Intra-mart versions and SSJS/Java API interpretations, it is recommended to use a **Hybrid Structure** that includes both nested and flat properties.
-
-**Node Object Properties:**
-- `processTargetConfigs`: Array of `PluginInfo` (Standard IAP).
-- `pluginId`: Flat property on node (Older/SSJS fallback).
-- `extensionPointId`: Flat property on node.
-- `parameter`: Flat property on node.
-- `pluginParameter`: Alias for `parameter`.
-
-**ApplyParamInfo Top-level Keys:**
-- `DCNodeConfigModels`: Official camelCase key.
-- `dynamicAndCnfmNodeConfigModels`: Lowercase alias used in some SSJS environments.
-
-## 3. Implementation in action_process.js (Robust Version)
+**JSON Structure Example:**
 ```javascript
-  var dynamicNode = {
-    nodeId: "zzz_dnm_01",
-    // Nested (Newer API)
-    processTargetConfigs: [{
-      extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-      pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-      parameter: "dev08"
-    }],
-    // Flat (Older/SSJS API fallback)
-    extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-    pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-    parameter: "dev08",
-    pluginParameter: "dev08"
-  };
-
-  // Set both variants for safety
-  parameter.DCNodeConfigModels = [dynamicNode];
-  parameter.dynamicAndCnfmNodeConfigModels = [dynamicNode];
+{
+  "DCNodeSetting": {
+    "zzz_dnm_01": {
+      "displayFlag": false,
+      "enableFlag": true,
+      "processTargetConfigs": [{
+        "extensionPointId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+        "pluginId": "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+        "parameter": "user_code"
+      }]
+    }
+  }
+}
 ```
 
 ## 4. Troubleshooting
-- **Property Names:** IM-Workflow APIs are case-sensitive and inconsistent. Always refer to the specific Info object documentation.
-- **Node Configurable:** Ensure the node in the Workflow Designer has "Process Target Configurable" checked.
-- **Injection Point:** Inject objects into `parameter` within the `apply` function of the action script.
+- **Plugin ID**: Ensure the `pluginId` matches the environment (e.g., `node.dynamic.user` vs `standard.user`).
+- **Hidden Input**: Ensure `imwNodeSetting` is a hidden input field within the `workflowOpenPageForm`.
+- **Timing**: Call the JSON building function (e.g., `setNodeDisplayFlags`) just before `workflowOpenPage()`.
 
 ---
-*Last Updated: 2026-05-06 by AI Research Agent*
+*Last Updated: 2026-05-07 by AI Research Agent*
