@@ -2,110 +2,88 @@
 <imart type="head">
   <title>Workflow ZZZ 01</title>
   <imart type="workflowOpenPageCsjs" />
-
+  <imart type="jsspRpc" name="NodeApi" page="training/dzu/practices/practice_wf/wf_01/api/node_service"
+    callback="nodeActionCB" />
+  <script src="ui/libs/jquery-validation-1.9.0/jquery.validate.js"></script>
+  <imart type="imuiValidationRule" rule="training/dzu/practices/practice_wf/wf_01/wf_zzz_01_validator#rules"
+    rulesName="rules" messagesName="messages" />
   <script>
-    function validateRequired() {
-      var reason = $('textarea[name="leave_reason"]').val();
-      var days = $('input[name="leave_days"]').val();
-      var errors = [];
+    var pendingPageType = null;
 
-      if (!reason || reason.trim() === "") {
-        errors.push("Leave Reason is required.");
-      }
-      if (!days || days.trim() === "") {
-        errors.push("Leave Days is required.");
-      } else if (isNaN(days) || parseInt(days) <= 0) {
-        errors.push("Leave Days must be a positive number.");
-      }
+    /**
+     * Custom Validation Rules (Standard imuiAddValidationRule API)
+     */
+    imuiAddValidationRule('noSecret', function(val, el, param) {
+      if (val === '') return true;
+      return val.toLowerCase().indexOf('secret') === -1;
+    }, 'zzz Reasons cannot contain prohibited words like "secret"!');
 
-      if (errors.length > 0) {
-        imuiShowErrorMessage("Input Error", errors);
-        return false;
-      }
-      return true;
-    }
+    imuiAddValidationRule('notNegative', function(val, el, param) {
+      if (val === '') return true;
+      return parseFloat(val) >= 0;
+    }, 'zzz This value cannot be negative!');
 
-    function validateTempSave() {
-      var reason = $('textarea[name="leave_reason"]').val();
-      if (!reason || reason.trim() === "") {
-        imuiShowErrorMessage("Input Error", "Please enter Leave Reason for temporary save.");
-        return false;
-      }
-      return true;
+    imuiAddValidationRule('maxThirty', function(val, el, param) {
+      if (val === '') return true;
+      return parseFloat(val) <= 30;
+    }, 'zzz You cannot apply for more than 30 days at once!');
+
+    /**
+     * Standard IMUI Validation Trigger (Client-side)
+     */
+    function validateStandard() {
+      return imuiValidate('#workflowOpenPageForm', rules, messages);
     }
 
     /**
-     * Thiết lập các thông số ẩn cho Workflow (Dynamic Node, Horizontal Node)
-     * Giúp ẩn các node không cần thiết trên UI và gán người duyệt tự động.
+     * Triggers the RPC call to get node configuration and proceeds to transition.
      */
-    function setNodeDisplayFlags() {
-      // 1. Cấu hình cho Dynamic Node (zzz_dnm_01)
-      var days = parseInt($('input[name="leave_days"]').val()) || 0;
-      var approver = "dev07"; // Mặc định < 3 ngày
-      if (days >= 7) {
-        approver = "dev03"; // >= 7 ngày
-      } else if (days >= 3) {
-        approver = "dev08"; // 3 - 6 ngày
-      }
+    function triggerNodeSettingRpc(pageType) {
+      pendingPageType = pageType;
 
-      var dynamicPlugin = {
-        extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-        pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-        parameter: approver
+      var inputData = {
+        leave_days: $('input[name="leave_days"]').val(),
+        item_total: $('input[name="item_total"]').val()
       };
 
-      // 2. Cấu hình cho Horizontal Node (zzz_hrz_01)
-      var itemTotal = parseInt($('input[name="item_total"]').val()) || 0;
-      var hrzApproverList = ["dev08", "dev07", "dev03"];
-      var hrzApprovers = [hrzApproverList[0]];
+      // Proceed directly to getting node settings (Client-side validation has passed)
+      NodeApi.getNodeSetting(inputData);
+    }
 
-      if (itemTotal > 100000) {
-        hrzApprovers = hrzApproverList;
-      } else if (itemTotal > 50000) {
-        hrzApprovers = hrzApproverList.slice(0, 2);
+    /**
+     * RPC Callback Handler
+     */
+    function nodeActionCB(res) {
+      if (res.error) {
+        imuiShowErrorMessage(res.message || "System error occurred.");
+        return;
       }
 
-      var expansions = [];
-      for (var i = 0; i < hrzApprovers.length; i++) {
-        expansions.push({
-          nodeName: "Approval (" + hrzApprovers[i] + ")",
-          processTargetConfigModel: [{
-            extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
-            pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
-            parameter: hrzApprovers[i]
-          }]
-        });
-      }
+      if (res.type === 'getNodeSetting') {
+        if (res.data) {
+          var nodeSettingJson = ImJson.toJSONString(res.data);
+          var $form = $("#workflowOpenPageForm");
+          if ($form.find('input[name="imwNodeSetting"]').length === 0) {
+            $form.append('<input type="hidden" name="imwNodeSetting" />');
+          }
+          $form.find('input[name="imwNodeSetting"]').val(nodeSettingJson);
 
-      // 3. Xây dựng đối tượng cấu hình Node chuẩn
-      var nodeSetting = {
-        "DCNodeSetting": {
-          "zzz_dnm_01": {
-            "displayFlag": false, // Ẩn node này trên UI chuẩn vì đã gán tự động
-            "enableFlag": true,
-            "processTargetConfigs": [dynamicPlugin] // Gán trực tiếp người duyệt ở đây
+          // Proceed with workflow operation
+          if (pendingPageType !== null) {
+            imuiResetForm('#workflowOpenPageForm');
+            workflowOpenPage(pendingPageType);
+            pendingPageType = null;
           }
-        },
-        "HVNodeSetting": {
-          "zzz_hrz_01": {
-            "displayFlag": false,
-            "enableFlag": true,
-            "matterNodeExpansions": expansions
-          }
+        } else {
+          imuiShowErrorMessage("Error: Could not retrieve node configuration.");
         }
-      };
-
-      var nodeSettingJson = ImJson.toJSONString(nodeSetting);
-
-      // Nhúng tham số vào form trước khi submit
-      var $form = $("#workflowOpenPageForm");
-      if ($form.find('input[name="imwNodeSetting"]').length === 0) {
-        $form.append('<input type="hidden" name="imwNodeSetting" />');
       }
-      $form.find('input[name="imwNodeSetting"]').val(nodeSettingJson);
     }
 
     $(function () {
+      // Prevent double submission (Standard IM pattern)
+      imuiDisableOnSubmit('#workflowOpenPageForm');
+
       $('#back').click(function () {
         $('#workflowOpenPageForm').attr('action', 'training/dzu/practices/practice_wf/wf_01/wf_zzz_01');
         $('#workflowOpenPageForm').submit();
@@ -113,36 +91,32 @@
       });
 
       $('#openPage0').click(function () {
-        if (!validateRequired()) return false;
-        setNodeDisplayFlags();
-        workflowOpenPage('0');
+        if (!validateStandard()) return false;
+        triggerNodeSettingRpc('0');
         return false;
       });
 
       $('#openPage1').click(function () {
-        if (!validateTempSave()) return false;
+        // Temp save might bypass some validations, but standard IM allows custom logic
         workflowOpenPage('1');
         return false;
       });
 
       $('#openPage2').click(function () {
-        if (!validateRequired()) return false;
-        setNodeDisplayFlags();
-        workflowOpenPage('2');
+        if (!validateStandard()) return false;
+        triggerNodeSettingRpc('2');
         return false;
       });
 
       $('#openPage3').click(function () {
-        if (!validateRequired()) return false;
-        setNodeDisplayFlags();
-        workflowOpenPage('3');
+        if (!validateStandard()) return false;
+        triggerNodeSettingRpc('3');
         return false;
       });
 
       $('#openPage4').click(function () {
-        if (!validateRequired()) return false;
-        setNodeDisplayFlags();
-        workflowOpenPage('4');
+        if (!validateStandard()) return false;
+        triggerNodeSettingRpc('4');
         return false;
       });
     });

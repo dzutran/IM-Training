@@ -1,5 +1,9 @@
 # Coding Rules & Standards (practice_ai)
 
+> [!IMPORTANT]
+> **AI Agents**: Before starting any task, you must read and follow the [Agent Implementation Rules](../agent_instructions/RULES.md).
+
+
 ## 1. Project Structure
 *   **View (`.html`, `.js`)**: Only contains UI logic and RPC calls.
 *   **RPC Gateway (`api/*.js`)**: Single entry point for client requests. Maps client data to common logic.

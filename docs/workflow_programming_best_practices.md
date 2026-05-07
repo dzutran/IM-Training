@@ -45,7 +45,10 @@ Based on the V7.2 Programming Guide, this document outlines practical rules and 
 ## 7. Dynamic Node Routing (Custom Screens)
 - **Primary Mechanism**: Use `imwNodeSetting` (JSON string) in the HTML form to override workflow routing dynamically.
 - **Why**: It is the only standard way to hide the node selection UI and assign approvers programmatically without using unstable Java-level thread injection.
-- **Plugin Recommendation**: Use the verified plugin `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user` for dynamic authority.
+- **Plugin Recommendation**:
+  - **User**: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user` (Parameter: `user_cd`)
+  - **Organization**: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.organization` (Parameter: `company_cd|org_cd`)
+  - **Role**: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic.role` (Parameter: `role_id`)
 - **Example Pattern**:
   ```javascript
   var nodeSetting = {
@@ -61,6 +64,67 @@ Based on the V7.2 Programming Guide, this document outlines practical rules and 
     }
   };
   ```
+
+## 8. Standardized Workflow Validation
+To ensure custom "zzz" error messages are correctly displayed and to avoid collision with system-default validation, follow this architecture:
+
+### 8.1. Validator Configuration (SSJS)
+- **Rules Only**: The validator file should only export a `rules` object. DO NOT include a `messages` property here, as the system tends to overwrite it with defaults.
+- **Path**: `training/dzu/practices/practice_wf/wf_01/wf_zzz_01_validator`
+- **Example**:
+  ```javascript
+  var rules = {
+    'leave_days': { required: true, numeric: true, maxThirty: true }
+  };
+  ```
+
+### 8.2. Custom Rule Registration (CSJS/HTML)
+- **Direct Registration**: Register custom rules using `imuiAddValidationRule` directly inside the `<script>` tag of your HTML file. This avoids extra file requests and keeps logic localized.
+- **Prefixing**: Always use a unique prefix (e.g., `zzz`) for custom error messages to differentiate them from system defaults.
+- **Example**:
+  ```javascript
+  imuiAddValidationRule('maxThirty', function(val, el, param) {
+    if (val === '') return true;
+    return parseFloat(val) <= 30;
+  }, 'zzz You cannot apply for more than 30 days!');
+  ```
+
+### 8.3. Tag Mapping (HTML)
+- **Variable Isolation**: Use distinct variable names for `rulesName` and `messagesName` within the `<imart type="imuiValidationRule">` tag.
+- **Call Pattern**: Pass these variables directly to `imuiValidate`.
+- **Example**:
+  ```html
+  <imart type="imuiValidationRule" rule="path/to/validator#rules" 
+         rulesName="rules" messagesName="messages" />
+  <script>
+    function validateStandard() {
+      return imuiValidate('#formId', rules, messages);
+    }
+  </script>
+  ```
+
+## 9. Node Expansion (HV)
+Based on the documentation, the `HVNodeSetting` key handles both **Horizontal** and **Vertical** expansion.
+
+### 9.1. Usage Patterns
+- **Horizontal Expansion**: Adding multiple parallel approvers to the current node.
+- **Vertical Expansion**: Adding additional sequential nodes after the current node.
+- **Structure**: Use `HVNodeSetting` and define `matterNodeExpansions` for either scenario.
+- **Extension Point**: `jp.co.intra_mart.workflow.plugin.authority.node.dynamic` (Unified for all process targets).
+
+### 9.2. Plugin Parameter Formats (Standard)
+| Plugin Type | Plugin ID suffix | Parameter Format |
+| :--- | :--- | :--- |
+| **User** | `.user` | `user_cd` |
+| **Organization** | `.organization` | `company_cd\|org_cd` |
+| **Public Group** | `.public_group` | `group_set_cd\|group_cd` |
+| **Role** | `.role` | `role_id` |
+
+### 9.3. Summary of Configuration Keys
+| Setting Type | JSON Key | Extension Point ID (Unified) |
+| :--- | :--- | :--- |
+| **Dynamic** | `DCNodeSetting` | `...node.dynamic` |
+| **Expansion (HV/VV)** | `HVNodeSetting` | `...node.dynamic` |
 
 ---
 *Last Updated: 2026-05-07 by AI Research Agent*

@@ -1,65 +1,72 @@
 # Intra-mart Form Validation Guide (imuiValidation)
 
-This guide covers how to implement professional client-side validation using standard Intra-mart UI components.
+This guide covers how to implement professional client-side and server-side validation using standard Intra-mart UI components.
 
 ---
 
 ## 1. Core Concept
-Intra-mart provides a declarative way to validate forms. You define rules in JSSP tags, and the system handles error message display and UI highlighting automatically.
+Intra-mart provides a declarative way to validate forms. You define rules in JSSP/Validator files, and the system handles error message display and UI highlighting automatically.
 
 ### Key Components:
-*   `<imart type="imuiValidationRule">`: Defines rules for each field.
-*   `imuiValidate('#formId', rules, messages)`: JS function to trigger validation.
-*   `imuiAddValidationRule()`: Function to add custom validation logic.
+*   `<imart type="imuiValidationRule">`: Binds rules and messages from a validator file to the UI.
+*   `imuiValidate('#formId', rules, messages)`: Client-side JS function to trigger validation.
+*   `imuiAddValidationRule(name, func, msg)`: API to register custom client-side rules.
+*   `imuiResetForm('#formId')`: Resets the validation state (clears highlights/messages).
 
 ---
 
-## 2. Implementation Pattern
+## 2. Standard Validation Rules (Reference)
 
-### A. Define Rules in HTML/JSSP
-Use the `imuiValidationRule` tag to link a field name to specific constraints.
+| Rule | Description | Example |
+| :--- | :--- | :--- |
+| `required` | Field is mandatory. | `required: true` |
+| `email` | Must be a valid email format. | `email: true` |
+| `alphanumeric`| Letters and numbers only. | `alphanumeric: true` |
+| `digits` | Max digits for integer/decimal parts. | `digits: [5, 2]` |
+| `maxlength` | Maximum character length. | `maxlength: 100` |
+| `regex` | Custom regular expression. | `regex: /^[A-Z]+$/` |
 
-```html
-<imart type="imuiValidationRule" name="user_id" rules='["required", "alphanumeric"]' />
-<imart type="imuiValidationRule" name="email" rules='["required", "email"]' />
-<imart type="imuiValidationRule" name="notes" rules='["maxLength[200]"]' />
-```
+---
 
-### B. Trigger Validation in JS
-In your `doSave` function, call `imuiValidate`.
+## 3. Custom Validator Implementation (High-End)
 
+To create a custom rule (e.g., `notSecret`):
+
+### A. Client-Side (HTML/JS)
 ```javascript
-function doSave() {
-  // 1. Check validation
-  if (!imuiValidate('#userForm')) {
-    return; // Stop if validation fails
-  }
-  
-  // 2. Proceed with RPC
-  var user = { ... };
-  UserApi.saveUser(user);
-}
+var customFunc = function(value, element, param) {
+    if (value === '') return true; // Allow empty if not 'required'
+    return value.toLowerCase().indexOf('secret') === -1;
+};
+
+imuiAddValidationRule('notSecret', customFunc, 'Cannot contain secret!');
 ```
 
-### C. Custom Validation Rules
-If you need a special check (e.g., "Must start with ZZZ"):
-
+### B. Validator File (`*_validator.js`)
+Simply add the rule name to the field's object.
 ```javascript
-// Add custom rule
-imuiAddValidationRule('startWithZZZ', function(value, element, params) {
-  return value.indexOf('ZZZ') === 0;
-}, 'Field must start with ZZZ');
-
-// Use it in JSSP
-// <imart type="imuiValidationRule" name="myField" rules='["startWithZZZ"]' />
+var rules = {
+    'reason': { caption: 'Reason', notSecret: true }
+};
 ```
 
 ---
 
-## 3. Useful Links
-*   [imuiValidationRule Tag Reference](https://api.intra-mart.jp/iap/apilist-jssp-tagdoc/doc/pc/imuiValidationRule/index.html)
-*   [imuiAddValidationRule JSDoc](https://api.intra-mart.jp/iap/jsdoc/symbols/_global_.html#imuiAddValidationRule)
-*   [Error Handling Design Guidelines](https://document.intra-mart.jp/library/iap/public/im_ui/im_design_guideline_pc/texts/error/index.html)
+## 4. Server-Side Integration (JSSP)
+
+Annotate your function to enable server-side validation:
+```javascript
+/**
+ * @validate path/to/validator#rules
+ * @onerror handleErrors
+ */
+function action(request) { ... }
+```
+
+In `handleErrors`, use `validationErrors.getMessages()` to get the error list.
 
 ---
-*Last Updated: 2026-05-06 by AI Research Agent*
+
+## 5. Design Guidelines
+*   **Double Submission**: Always use `imuiDisableOnSubmit('#formId')`.
+*   **Success Feedback**: Use `imuiResetForm` after successful AJAX/RPC to clear validation UI.
