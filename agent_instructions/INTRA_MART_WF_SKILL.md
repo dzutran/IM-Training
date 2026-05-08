@@ -49,6 +49,7 @@ Before any implementation, the agent MUST synchronize with these sources:
 
 ## 6. Advanced imWorkflow Client API Skill
 **Pattern**: Use `imWorkflow` JavaScript object for framework-integrated control.
+- **Dependency**: MUST include `<script src="im_workflow/js/api_base.js" defer></script>` in the `<imart type="head">` section.
 - **Navigation**: Use `imWorkflow.transition.returnTo()` for intelligent "Back" functionality that respects workflow history.
 - **Processing**: Use `imWorkflow.transition.afterProcess()` after a successful transaction to handle standard redirects.
 - **Modals**: Use `imWorkflow.modal.showApply()` or `showTemporarySave()` for modal-based workflows, passing `processParameter` and `optionalParameter`.
