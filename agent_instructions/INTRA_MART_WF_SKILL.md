@@ -55,5 +55,21 @@ Before any implementation, the agent MUST synchronize with these sources:
 - **Modals**: Use `imWorkflow.modal.showApply()` or `showTemporarySave()` for modal-based workflows, passing `processParameter` and `optionalParameter`.
 - **Data Passing**: Always use `optionalParameter.userParameter` to pass custom form data to the workflow engine.
 
+## 7. Gold Standard Architecture (Tiered Design)
+**Pattern**: Strict separation of concerns to ensure scalability and AI-readability.
+- **UI Layer (`screen/`)**: Focus only on display and client validation. No business logic here.
+- **Coordination Layer (`action/`)**: Use `ActionProcess.js` to handle workflow events. This is the only place authorized to call data persistence functions.
+- **Data Access Layer (`common/` or `common.js`)**: All `tdb.insert/update/delete` MUST reside here.
+
+## 8. Transaction Safety Rules (CRITICAL)
+**Rule**: NEVER use manual `tdb.commit()` or `tdb.rollback()` inside `ActionProcess`.
+- **Reason**: The IM Workflow Engine manages the global transaction. Manual commits break the engine's ability to rollback on failure, leading to "Ghost Matters" (data saved but workflow failed).
+- **Verification**: Always check if `ActionProcess` is returning a proper `result` object with `resultFlag`.
+
+## 9. Advanced Plugin Development Pattern
+**Pattern**: Use `WorkflowAuthorityExecEventListener` for dynamic routing.
+- **Logic**: Calculate routing values (like `item_total`) and compare against thresholds to inject dynamic nodes.
+- **UI**: Keep plugin configuration screens (`config.html`) lightweight and consistent with `imui` styles.
+
 ---
-*Created: 2026-05-08 | Version: 1.2 | Standardized for dzutran/IM-Training*
+*Created: 2026-05-08 | Version: 2.0 (Master Edition) | Standardized for dzutran/IM-Training*
