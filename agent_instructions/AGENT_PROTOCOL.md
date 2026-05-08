@@ -52,7 +52,7 @@ Mandatory checks for Developer and Reviewer:
 ### 💻 Backend (SSJS) & Frontend (UI)
 - [ ] **Transaction Safety**: `try-catch` for non-core logic (Mail, Log).
 - [ ] **Naming**: CamelCase for Workflow params, snake_case for DB columns.
-- [ ] **imui Tags**: Use official tags. Buttons follow `imui_button_standard.md`.
+- [ ] **imui Tags**: Use official tags. UI standards follow `dzu/knowledge/02_guides/imui_design_system.md`.
 
 ---
 

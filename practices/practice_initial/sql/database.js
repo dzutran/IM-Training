@@ -1,6 +1,6 @@
 function getData(req) {
-  const sqlExcute = 'training/dzu/sql/db_select_execute';
-  const sqlFetch = 'training/dzu/sql/db_select_fetch';
+  const sqlExcute = 'training/dzu/practices/practice_initial/sql/db_select_execute';
+  const sqlFetch = 'training/dzu/practices/practice_initial/sql/db_select_fetch';
   var db = new SharedDatabase(req.dbName);
   let dbType = req.dbType;
   let skip = +req.skip;

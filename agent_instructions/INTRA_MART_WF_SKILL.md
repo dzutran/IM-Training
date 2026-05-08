@@ -5,8 +5,8 @@ This skill file is a distilled guide for AI Agents to implement workflow feature
 
 ## 1. Research & Context Skill
 Before any implementation, the agent MUST synchronize with these sources:
-- **Reference**: `dzu/docs/workflow_plugin_reference.md` (For Plugin IDs & Params).
-- **Standards**: `dzu/docs/workflow_programming_best_practices.md` (For Architectural patterns).
+- **Reference**: `dzu/knowledge/01_standards/workflow_plugin_reference.md` (For Plugin IDs & Params).
+- **Standards**: `dzu/knowledge/01_standards/workflow_programming_best_practices.md` (For Architectural patterns).
 - **Rules**: `dzu/agent_instructions/RULES.md` (For Mandatory constraints).
 
 ---
@@ -45,7 +45,7 @@ Before any implementation, the agent MUST synchronize with these sources:
 ## 5. Coding Aesthetic Skill
 - **Premium UI**: Use standard `imui` tags. No custom CSS.
 - **Logic Separation**: Keep SQL in `.sql` files, business logic in `common.js`, and screen logic in JSSP.
-- **Documentation**: If a new "Gotcha" is found, create a report in `dzu/research/`.
+- **Documentation**: If a new "Gotcha" is found, create a report in `dzu/knowledge/03_research/`.
 
 ## 6. Advanced imWorkflow Client API Skill
 **Pattern**: Use `imWorkflow` JavaScript object for framework-integrated control.

@@ -17,7 +17,7 @@
 
   <!-- script for validation -->
   <imart type="imuiScript" src="ui/libs/jquery-validation-1.9.0/jquery.validate.js" />
-  <imart type="imuiValidationRule" rule="training/dzu/validator#rules" rulesName="rules" messagesName="msg" />
+  <imart type="imuiValidationRule" rule="training/dzu/practices/practice_initial/validator#rules" rulesName="rules" messagesName="msg" />
 
   <!-- script for sharedResource -->
   <script>
@@ -41,9 +41,9 @@
 
 
   <!-- jsspRpc -->
-  <imart type="jsspRpc" name="Common" callback="getDataCB" page="training/dzu/api/common" />
-  <imart type="jsspRpc" name="FileUtil" callback="getFileCB" page="training/dzu/api/fileUtil" />
-  <imart type="jsspRpc" name="Database" callback="getDataDB" page="training/dzu/sql/database" />
+  <imart type="jsspRpc" name="Common" callback="getDataCB" page="training/dzu/practices/practice_initial/api/common" />
+  <imart type="jsspRpc" name="FileUtil" callback="getFileCB" page="training/dzu/practices/practice_initial/api/fileUtil" />
+  <imart type="jsspRpc" name="Database" callback="getDataDB" page="training/dzu/practices/practice_initial/sql/database" />
 
   <script>
     let util = (function () {
@@ -242,7 +242,7 @@
 </div>
 
 <!-- include toolbar -->
-<imart type="include" page="training/dzu/component/toolbar" />
+<imart type="include" page="training/dzu/practices/practice_initial/component/toolbar" />
 <imart type="imuiDropdown" data=$data.dataDropdown />
 <!-- ④コンテンツエリア -->
 <div class="imui-form-container-wide">
@@ -506,7 +506,7 @@
 
 <imart type="imuiDialog" useHelp=$useHelp id="dialogUpload" minWidth="500px" autoOpen="false" buttons=sampleButtons>
   <imart type="imuiFileUpload" id="uploadItem" enableDelete onSuccess="uploadSuccess" onRemove="removeFile"
-    url="api/dzu/file_receiver" />
+    url="api/dzu/practices/practice_initial/file_receiver" />
 </imart>
 <script type="text/javascript">
   let fileNmUpload = [];
