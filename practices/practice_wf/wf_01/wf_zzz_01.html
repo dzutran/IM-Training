@@ -155,8 +155,18 @@
       imuiDisableOnSubmit('#workflowOpenPageForm');
 
       $('#back').click(function () {
-        $('#workflowOpenPageForm').attr('action', 'training/dzu/practices/practice_wf/wf_01/wf_zzz_01');
-        $('#workflowOpenPageForm').submit();
+        // Professional navigation using imWorkflow Client API
+        imWorkflow.transition.returnTo();
+        return false;
+      });
+
+      $('#matterInfoBtn').click(function () {
+        // Show matter information in a professional alert
+        var info = "Matter Details:\n" + 
+                   "- UserDataId: <imart type="string" value=$data.imwUserDataId />\n" +
+                   "- FlowId: <imart type="string" value=$data.imwFlowId />\n" +
+                   "- PageType: <imart type="string" value=$data.imwPageType />";
+        imuiAlert(info, "zzz System Information");
         return false;
       });
 
@@ -199,13 +209,42 @@
   imwApplyBaseDate=$data.imwApplyBaseDate imwNodeId=$data.imwNodeId imwFlowId=$data.imwFlowId
   imwCallOriginalParams=$data.imwCallOriginalParams imwNextScriptPath=$data.imwCallOriginalPagePath>
 
+  <!-- Professional Official Toolbar -->
+  <div class="imui-toolbar-wrap">
+    <div class="imui-toolbar-inner">
+      <!-- Left side: Main Operations -->
+      <ul class="imui-list-toolbar">
+        <li>
+          <imart type="imuiButton" value=$data.msg.btnBack id="back" name="back" iconClass="im-ui-icon-common-16-back" class="imui-toolbar-icon" />
+        </li>
+        <li class="icon-split"></li>
+        <li>
+          <span class="imui-toolbar-icon" style="padding: 0 10px; line-height: 26px; color: #666; font-weight: bold;">
+            <imart type="string" value=$data.msg.title />
+          </span>
+        </li>
+      </ul>
+
+      <!-- Right side: Utilities -->
+      <ul class="imui-list-toolbar-utility">
+        <li>
+          <a href="javascript:void(0);" id="matterInfoBtn" class="imui-toolbar-icon" title="Matter Details">
+            <span class="im-ui-icon-common-16-info"></span>
+          </a>
+        </li>
+        <li class="icon-split"></li>
+        <li>
+          <a href="javascript:location.reload();" class="imui-toolbar-icon" title="Refresh Page">
+            <span class="im-ui-icon-common-16-refresh"></span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
       <h2><imart type="string" value=$data.msg.title /></h2>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <imart type="imuiButton" value=$data.msg.btnBack id="back" name="back" class="imui-medium-button" />
     </div>
 
     <table class="imui-form">

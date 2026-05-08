@@ -70,9 +70,7 @@ function getNodeSetting(data) {
         "displayFlag": false,
         "enableFlag": true,
         "matterNodeExpansions": expansions
-      }
-    },
-    "VVNodeSetting": {
+      },
       "zzz_vtz_01": {
         "displayFlag": false,
         "enableFlag": true,

@@ -47,5 +47,12 @@ Before any implementation, the agent MUST synchronize with these sources:
 - **Logic Separation**: Keep SQL in `.sql` files, business logic in `common.js`, and screen logic in JSSP.
 - **Documentation**: If a new "Gotcha" is found, create a report in `dzu/research/`.
 
+## 6. Advanced imWorkflow Client API Skill
+**Pattern**: Use `imWorkflow` JavaScript object for framework-integrated control.
+- **Navigation**: Use `imWorkflow.transition.returnTo()` for intelligent "Back" functionality that respects workflow history.
+- **Processing**: Use `imWorkflow.transition.afterProcess()` after a successful transaction to handle standard redirects.
+- **Modals**: Use `imWorkflow.modal.showApply()` or `showTemporarySave()` for modal-based workflows, passing `processParameter` and `optionalParameter`.
+- **Data Passing**: Always use `optionalParameter.userParameter` to pass custom form data to the workflow engine.
+
 ---
-*Created: 2026-05-07 | Version: 1.0 | Standardized for dzutran/IM-Training*
+*Created: 2026-05-08 | Version: 1.2 | Standardized for dzutran/IM-Training*
