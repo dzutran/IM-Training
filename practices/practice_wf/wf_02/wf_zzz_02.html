@@ -1,6 +1,6 @@
 <html>
 <imart type="head">
-  <title>Workflow Monitor (Standard UI)</title>
+  <title><imart type="string" value=$data.msg.title /></title>
 
   <style type="text/css">
     /* Chỉ giữ lại các style cần thiết cho logic hiển thị, loại bỏ trang trí hiện đại */
@@ -64,7 +64,7 @@
     function onApplyNew() {
       var flowId = $("#searchFlowId").val();
       if (!flowId) {
-        imuiAlert("Please enter a Flow ID first.");
+        imuiAlert($data.msg.errNoFlow);
         return;
       }
       var url = 'im_workflow/common/switch/switch_content?' +
@@ -77,23 +77,23 @@
 </imart>
 
 <div class="imui-title">
-  <h1>Workflow Monitor</h1>
+  <h1><imart type="string" value=$data.msg.title /></h1>
 </div>
 
 <imui-container-main>
   <!-- Search Area (Standard imuiForm) -->
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
-      <h2>Search Condition</h2>
+      <h2><imart type="string" value=$data.msg.capSearch /></h2>
     </div>
     <table class="imui-form">
       <tr>
-        <th width="15%"><label>Flow ID</label></th>
+        <th width="15%"><label><imart type="string" value=$data.msg.capFlowId /></label></th>
         <td width="35%">
           <input type="text" id="searchFlowId" value="wf_zzz_01" />
         </td>
         <td class="align-right">
-          <imart type="imuiButton" id="searchBtn" label="Search" class="imui-button" onclick="onSearch()" />
+          <imart type="imuiButton" id="searchBtn" label=$data.msg.btnSearch class="imui-button" onclick="onSearch()" />
         </td>
       </tr>
     </table>
@@ -104,7 +104,7 @@
   <!-- List Area -->
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
-      <h2>Matter List</h2>
+      <h2><imart type="string" value=$data.msg.capList /></h2>
     </div>
 
     <!-- Toolbar Area -->
@@ -112,11 +112,11 @@
       <div class="imui-toolbar">
         <ul>
           <li>
-            <imart type="imuiButton" id="applyBtn" label="Apply New" iconClass="im-ui-icon-common-16-edit"
+            <imart type="imuiButton" id="applyBtn" label=$data.msg.btnApply iconClass="im-ui-icon-common-16-edit"
               onclick="onApplyNew()" />
           </li>
           <li>
-            <imart type="imuiButton" id="refreshBtn" label="Refresh List" iconClass="im-ui-icon-common-16-refresh"
+            <imart type="imuiButton" id="refreshBtn" label=$data.msg.btnRefresh iconClass="im-ui-icon-common-16-refresh"
               onclick="onSearch()" />
           </li>
         </ul>
@@ -126,11 +126,11 @@
     <imart type="imuiListTable" id="matterTable" data=$data.matters height="400" rowNumbers="true"
       onGridComplete="onGridComplete" autoWidth="true" shrinkToFit="true">
       <cols>
-        <col name="system_matter_id" caption="System ID" width="180" align="center" />
-        <col name="matter_name" caption="Matter Descriptor" width="300" />
-        <col name="node_id" caption="Node Phase" width="160" align="center" />
-        <col name="apply_user_name" caption="Initiated By" width="160" />
-        <col name="apply_date" caption="Timeline" width="200" align="center" />
+        <col name="system_matter_id" caption=$data.msg.capId width="180" align="center" />
+        <col name="matter_name" caption=$data.msg.capName width="300" />
+        <col name="node_id" caption=$data.msg.capNode width="160" align="center" />
+        <col name="apply_user_name" caption=$data.msg.capUser width="160" />
+        <col name="apply_date" caption=$data.msg.capDate width="200" align="center" />
 
         <col name="user_data_id" hidden />
         <col name="flow_id" hidden />

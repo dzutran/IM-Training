@@ -225,7 +225,7 @@
               style="display: inline-block; margin-left: 15px; padding: 2px 8px; background-color: #e7f3ff; border: 1px solid #b3d7ff; color: #004085; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
               <span class="im-ui-icon-common-16-info"
                 style="display: inline-block; vertical-align: middle; margin-top: -3px;"></span>
-              Rules: &lt;3d: dev07 | 3-6d: dev08 | &ge;7d: dev03
+              <imart type="string" value=$data.msg.infoLeaveRules />
             </span>
           </td>
         </tr>
@@ -237,7 +237,19 @@
               style="display: inline-block; margin-left: 15px; padding: 2px 8px; background-color: #fff3e0; border: 1px solid #ffe0b2; color: #e65100; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
               <span class="im-ui-icon-common-16-info"
                 style="display: inline-block; vertical-align: middle; margin-top: -3px;"></span>
-              Expansion: Default: dev08 | >50k: 3 users | >100k: 5 users
+              <imart type="string" value=$data.msg.infoExpansion />
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th><label>Parallel Node</label></th>
+          <td>
+            <imart type="imuiTextbox" value="zzz_vtz_01" readonly class="imui-text-readonly" style="width: 100px;" />
+            <span
+              style="display: inline-block; margin-left: 15px; padding: 2px 8px; background-color: #f3e5f5; border: 1px solid #d1c4e9; color: #4527a0; border-radius: 4px; font-weight: bold; font-size: 0.85em;">
+              <span class="im-ui-icon-common-16-info"
+                style="display: inline-block; vertical-align: middle; margin-top: -3px;"></span>
+              <imart type="string" value=$data.msg.infoParallelRules />
             </span>
           </td>
         </tr>

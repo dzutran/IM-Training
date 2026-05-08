@@ -71,6 +71,38 @@ function getNodeSetting(data) {
         "enableFlag": true,
         "matterNodeExpansions": expansions
       }
+    },
+    "VVNodeSetting": {
+      "zzz_vtz_01": {
+        "displayFlag": false,
+        "enableFlag": true,
+        "matterNodeExpansions": [
+          {
+            nodeName: "Parallel (dev03)",
+            processTargetConfigModel: [{
+              extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+              pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+              parameter: "dev03"
+            }]
+          },
+          {
+            nodeName: "Parallel (dev07)",
+            processTargetConfigModel: [{
+              extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+              pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+              parameter: "dev07"
+            }]
+          },
+          {
+            nodeName: "Parallel (dev08)",
+            processTargetConfigModel: [{
+              extensionPointId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic",
+              pluginId: "jp.co.intra_mart.workflow.plugin.authority.node.dynamic.user",
+              parameter: "dev08"
+            }]
+          }
+        ]
+      }
     }
   };
 

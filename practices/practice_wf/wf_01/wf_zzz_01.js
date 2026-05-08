@@ -35,6 +35,9 @@ function init(request) {
       btnTemp: "Temp Save",
       btnBack: "Back",
       btnProcess: "Process",
+      infoLeaveRules: "Rules: <3d: dev07 | 3-6d: dev08 | >=7d: dev03",
+      infoExpansion: "Expansion: Default: dev08 | >50k: 3 users | >100k: 5 users",
+      infoParallelRules: "Parallel: dev03, dev07, dev08 assigned to Parallel Node",
       msgConfirm: "Confirmation",
       msgError: "Validation Error",
       msgSuccess: "Success"
