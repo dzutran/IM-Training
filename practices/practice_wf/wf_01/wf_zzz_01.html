@@ -58,26 +58,26 @@
         }
       };
 
-      // 2. Define custom messages to override EVERYTHING
+      // 2. Define custom messages using Server-side <imart> tags inside JS
       var customMessages = {
         'leave_reason': {
-          'required': 'zzz Please enter the reason for your leave!',
-          'maxlength': 'zzz Reason is too long (max 200 chars)!',
-          'noSecret': 'zzz Reasons cannot contain prohibited words like "secret"!'
+          'required': '<imart type="string" value=$data.msg.zzz_err_required_reason escapeXml="true" escapeJs="true" />',
+          'maxlength': '<imart type="string" value=$data.msg.zzz_err_maxlength_reason escapeXml="true" escapeJs="true" />',
+          'noSecret': '<imart type="string" value=$data.msg.zzz_err_no_secret escapeXml="true" escapeJs="true" />'
         },
         'leave_days': {
-          'required': 'zzz How many days do you need?',
-          'numeric': 'zzz Leave days must be a number!',
-          'min': 'zzz Minimum leave is 0.5 days!',
-          'digits': 'zzz Please enter up to 2 digits and 1 decimal place!',
-          'maxThirty': 'zzz You cannot apply for more than 30 days at once!',
-          'notNegative': 'zzz This value cannot be negative!'
+          'required': '<imart type="string" value=$data.msg.zzz_err_required_days escapeXml="true" escapeJs="true" />',
+          'numeric': '<imart type="string" value=$data.msg.zzz_err_numeric_days escapeXml="true" escapeJs="true" />',
+          'min': '<imart type="string" value=$data.msg.zzz_err_min_days escapeXml="true" escapeJs="true" />',
+          'digits': '<imart type="string" value=$data.msg.zzz_err_digits_days escapeXml="true" escapeJs="true" />',
+          'maxThirty': '<imart type="string" value=$data.msg.zzz_err_max_thirty escapeXml="true" escapeJs="true" />',
+          'notNegative': '<imart type="string" value=$data.msg.zzz_err_not_negative escapeXml="true" escapeJs="true" />'
         },
         'item_total': {
-          'number': 'zzz Item total must be a valid number!',
-          'min': 'zzz Item total cannot be less than 0!',
-          'max': 'zzz Item total cannot exceed 1,000,000!',
-          'notNegative': 'zzz This value cannot be negative!'
+          'number': '<imart type="string" value=$data.msg.zzz_err_number_total escapeXml="true" escapeJs="true" />',
+          'min': '<imart type="string" value=$data.msg.zzz_err_min_total escapeXml="true" escapeJs="true" />',
+          'max': '<imart type="string" value=$data.msg.zzz_err_max_total escapeXml="true" escapeJs="true" />',
+          'notNegative': '<imart type="string" value=$data.msg.zzz_err_not_negative escapeXml="true" escapeJs="true" />'
         }
       };
 
@@ -140,9 +140,15 @@
       };
 
       var tempMessages = {
-        'leave_reason': { 'maxlength': 'zzz Reason is too long even for a draft!' },
-        'leave_days': { 'numeric': 'zzz Must be a number!', 'notNegative': 'zzz No negative days!' },
-        'item_total': { 'number': 'zzz Must be a number!', 'notNegative': 'zzz No negative total!' }
+        'leave_reason': { 'maxlength': '<imart type="string" value=$data.msg.zzz_err_maxlength_reason escapeXml="true" escapeJs="true" />' },
+        'leave_days': { 
+          'numeric': '<imart type="string" value=$data.msg.zzz_err_numeric_days escapeXml="true" escapeJs="true" />', 
+          'notNegative': '<imart type="string" value=$data.msg.zzz_err_not_negative escapeXml="true" escapeJs="true" />' 
+        },
+        'item_total': { 
+          'number': '<imart type="string" value=$data.msg.zzz_err_number_total escapeXml="true" escapeJs="true" />', 
+          'notNegative': '<imart type="string" value=$data.msg.zzz_err_not_negative escapeXml="true" escapeJs="true" />' 
+        }
       };
 
       return imuiValidate('#workflowOpenPageForm', tempRules, tempMessages);
@@ -156,8 +162,8 @@
       imuiDisableOnSubmit('#workflowOpenPageForm');
 
       $('#back').click(function () {
-        // Professional navigation using imWorkflow Client API
-        imWorkflow.transition.returnTo();
+        // Use the 'Back Form' pattern from purchase sample
+        $('#backForm').submit();
         return false;
       });
 
@@ -207,7 +213,9 @@
       <!-- Left side: Main Operations -->
       <ul class="imui-list-toolbar">
         <li>
-          <imart type="imuiButton" value=$data.msg.btnBack id="back" name="back" iconClass="im-ui-icon-common-16-back" class="imui-toolbar-icon" />
+          <imart type="tag" tagname="a" href="javascript:void(0);" id="back" class="imui-toolbar-icon" title=$data.msg.btnBack>
+            <span class="im-ui-icon-common-16-back"></span>
+          </imart>
         </li>
         <li class="icon-split"></li>
         <li>
@@ -334,6 +342,10 @@
       </imart>
     </div>
   </div>
+</imart>
+
+<imart type="tag" tagname="form" name="backForm" id="backForm" method="POST" action=$data.imwCallOriginalPagePath escapeXml="true" escapeJs="false">
+  <imart type="hidden" imwCallOriginalParams=$data.imwCallOriginalParams escapeXml="true" escapeJs="false" />
 </imart>
 
 </html>

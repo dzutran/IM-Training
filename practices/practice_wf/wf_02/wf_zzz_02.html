@@ -1,6 +1,8 @@
 <html>
 <imart type="head">
-  <title><imart type="string" value=$data.msg.title /></title>
+  <title>
+    <imart type="string" value=$data.msg.title />
+  </title>
 
   <style type="text/css">
     /* Chỉ giữ lại các style cần thiết cho logic hiển thị, loại bỏ trang trí hiện đại */
@@ -37,23 +39,55 @@
         var rowId = ids[i];
         var rowData = $grid.jqGrid('getRowData', rowId);
 
-        var url = 'im_workflow/common/switch/switch_content?' +
-          'imwSystemMatterId=' + rowData.system_matter_id +
-          '&imwUserDataId=' + rowData.user_data_id +
-          '&imwNodeId=' + rowData.node_id +
-          '&imwPageType=' + rowData.page_type +
-          '&imwFlowId=' + rowData.flow_id +
-          '&imwCallOriginalPagePath=training/dzu/practices/practice_wf/wf_02/wf_zzz_02';
-
-        var linkHtml = '<a href="' + url + '" target="_blank">' + rowData.system_matter_id + '</a>';
-        $grid.setCell(rowId, 'system_matter_id', linkHtml);
-
+        // Highlight approval node zzz_approve_01
         if (rowData.node_id === 'zzz_approve_01') {
           $grid.find('#' + rowId).addClass('im-workflow-highlight-row');
+          // Highlight node_id and matter_name with standard classes or simple styles
           $grid.setCell(rowId, 'node_id', '<span class="status-hot-text">' + rowData.node_id + '</span>');
           $grid.setCell(rowId, 'matter_name', '🚩 ' + rowData.matter_name);
         }
       }
+    }
+
+    /**
+     * Declarative attribute provider for jqGrid columns
+     */
+    function cellAttrProvider(rowId, val, rawObject, cm, rdata) {
+      return 'style="color: #0066cc; text-decoration: underline; cursor: pointer;"';
+    }
+
+    /**
+     * Unified Cell Selection Handler (RESTful Standards)
+     */
+    function onCellSelect(rowid, iCol, cellcontent, e) {
+      var $grid = $(this);
+      var colModel = $grid.jqGrid('getGridParam', 'colModel');
+      var colName = colModel[iCol].name;
+      var rowData = $grid.jqGrid('getRowData', rowid);
+
+      if (colName === 'flow_link') {
+        // Open Flow Information Popup
+        openFlowPopup(rowData.system_matter_id);
+      } else if (colName === 'system_matter_id') {
+        // Open Workflow Processing Screen directly (RESTful)
+        var url = 'im_workflow/user/process/process_direct/' + rowData.system_matter_id + '/' + rowData.node_id;
+        window.open(url, '_blank');
+      }
+    }
+
+    /**
+     * Opens the Flow Information screen in a professional popup window
+     */
+    function openFlowPopup(systemMatterId) {
+      if (!systemMatterId) return;
+
+      var url = 'im_workflow/matters/' + systemMatterId + '/flow-info';
+      var w = 1100;
+      var h = 800;
+      var left = (screen.width / 2) - (w / 2);
+      var top = (screen.height / 2) - (h / 2);
+
+      window.open(url, 'FlowInfoPopup', 'width=' + w + ',height=' + h + ',top=' + top + ',left=' + left + ',resizable=yes,scrollbars=yes,status=no');
     }
 
     function onSearch() {
@@ -77,18 +111,24 @@
 </imart>
 
 <div class="imui-title">
-  <h1><imart type="string" value=$data.msg.title /></h1>
+  <h1>
+    <imart type="string" value=$data.msg.title />
+  </h1>
 </div>
 
 <imui-container-main>
   <!-- Search Area (Standard imuiForm) -->
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
-      <h2><imart type="string" value=$data.msg.capSearch /></h2>
+      <h2>
+        <imart type="string" value=$data.msg.capSearch />
+      </h2>
     </div>
     <table class="imui-form">
       <tr>
-        <th width="15%"><label><imart type="string" value=$data.msg.capFlowId /></label></th>
+        <th width="15%"><label>
+            <imart type="string" value=$data.msg.capFlowId />
+          </label></th>
         <td width="35%">
           <input type="text" id="searchFlowId" value="wf_zzz_01" />
         </td>
@@ -104,7 +144,9 @@
   <!-- List Area -->
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
-      <h2><imart type="string" value=$data.msg.capList /></h2>
+      <h2>
+        <imart type="string" value=$data.msg.capList />
+      </h2>
     </div>
 
     <!-- Toolbar Area -->
@@ -124,9 +166,12 @@
     </div>
 
     <imart type="imuiListTable" id="matterTable" data=$data.matters height="400" rowNumbers="true"
-      onGridComplete="onGridComplete" autoWidth="true" shrinkToFit="true">
+      onGridComplete="onGridComplete" onCellSelect="onCellSelect" autoWidth="true" shrinkToFit="true">
       <cols>
-        <col name="system_matter_id" caption=$data.msg.capId width="180" align="center" />
+        <col name="flow_link" caption=$data.msg.capFlowInfo width="40" align="center" sortable="false" onCellAttr="cellAttrProvider">
+          <showIcon iconClass="im-ui-icon-common-16-information" />
+        </col>
+        <col name="system_matter_id" caption=$data.msg.capId width="180" align="center" onCellAttr="cellAttrProvider" />
         <col name="matter_name" caption=$data.msg.capName width="300" />
         <col name="node_id" caption=$data.msg.capNode width="160" align="center" />
         <col name="apply_user_name" caption=$data.msg.capUser width="160" />

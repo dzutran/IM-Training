@@ -4,24 +4,23 @@
  */
 var MailUtils = (function () {
     return {
-        /**
+         /**
          * Gửi email thông báo chi tiết cho người dùng
          * @param {String} userCd - Mã người dùng nhận mail
          * @param {String} subject - Tiêu đề
-         * @param {Object} details - Đối tượng chứa thông tin đơn (systemMatterId, matterName, reason, days, v.v.)
+         * @param {Object} details - Đối tượng chứa thông tin đơn
+         * @param {String} forcedEmail - (Tùy chọn) Email đã được resolve sẵn từ bên ngoài
          */
-        sendNotification: function (userCd, subject, details) {
+        sendNotification: function (userCd, subject, details, forcedEmail) {
             try {
-                var targetEmail = userCd + "@intra-mart.local";
-                if (userCd === Contexts.getAccountContext().userCd) {
-                    targetEmail = Contexts.getAccountContext().mailAddress || targetEmail;
-                }
+                // 0. Lấy thông tin email (Ưu tiên dùng forcedEmail nếu có)
+                var targetEmail = forcedEmail || (userCd + "@intra-mart.local");
 
                 // 0. Xây dựng URL điều hướng (Ưu tiên processUrl cho người xử lý, mặc định referenceUrl cho người xem)
                 var url = details.processUrl || ("http://192.168.0.201:8082/imart/im_workflow/user/reference/reference_direct/" + details.systemMatterId);
 
                 // 1. Xây dựng nội dung Plain Text (Dành cho các trình đọc mail cũ)
-                var body = "Chào " + (details.applyUserName || userCd) + ",\n\n" +
+                var body = "Chào " + (details.targetUserName || userCd) + ",\n\n" +
                            "Đơn workflow của bạn vừa có cập nhật mới:\n" +
                            "--------------------------------------------------\n" +
                            "Trạng thái: " + subject + "\n" +
@@ -32,7 +31,7 @@ var MailUtils = (function () {
                 body += "--------------------------------------------------\n\n" +
                         "Xem chi tiết đơn tại: " + url + "\n\n" +
                         "Trân trọng,\nWorkflow System";
-
+ 
                 // 2. Xây dựng nội dung HTML hoàn chỉnh (Bọc trong thẻ <html> theo docs)
                 var htmlBody = "<html><body style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #374151;'>" +
                     "<div style='max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;'>" +
@@ -40,7 +39,7 @@ var MailUtils = (function () {
                     "    <h3 style='margin: 0; color: #111827;'>Cập nhật trạng thái đơn</h3>" +
                     "  </div>" +
                     "  <div style='padding: 20px;'>" +
-                    "    <p>Chào <strong>" + (details.applyUserName || userCd) + "</strong>,</p>" +
+                    "    <p>Chào <strong>" + (details.targetUserName || userCd) + "</strong>,</p>" +
                     "    <p>Đơn workflow của bạn đã được xử lý với trạng thái: <span style='background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 600;'>" + subject + "</span></p>" +
                     "    <div style='background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0;'>" +
                     "      <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>" +

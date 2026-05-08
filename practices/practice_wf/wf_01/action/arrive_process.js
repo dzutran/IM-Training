@@ -80,12 +80,50 @@ function execute(parameter) {
             processUrl: processUrl // Truyền URL xử lý trực tiếp vào Mail Details
         };
 
-        // 3. Gửi mail HTML chuyên nghiệp
-        // Ưu tiên gửi cho danh sách người xử lý ở node hiện tại
-        var targetUsers = parameter.nodeAuthUserCdList || [parameter.preNodeAuthUserCd];
+        // 3. Truy vấn danh sách người xử lý và thông tin Email/Tên (Dùng locale của người login)
+        var db = new TenantDatabase();
+        var accountContext = Contexts.getAccountContext();
+        var localeId = "ja"; // Mặc định
         
-        for (var i = 0; i < targetUsers.length; i++) {
-            MailUtils.sendNotification(targetUsers[i], mailConfig.subject, mailDetails);
+        try {
+            // Ép kiểu sang String để đảm bảo lấy được giá trị "ja", "en", v.v.
+            localeId = accountContext.locale.toString();
+        } catch (e) {
+            Debug.console("Locale error: " + e.message);
+        }
+        
+        var sql = " SELECT t.auth_user_code, t.auth_user_name, u.email_address1 " +
+                  " FROM imw_t_actv_executable_user t " +
+                  " LEFT JOIN imm_user u ON t.auth_user_code = u.user_cd AND t.locale_id = u.locale_id " +
+                  " WHERE t.system_matter_id = ? AND t.node_id = ? AND t.locale_id = ? ";
+        
+        var result = db.select(sql, [
+            DbParameter.string(parameter.systemMatterId), // Fix: systemMatterId
+            DbParameter.string(parameter.nodeId),
+            DbParameter.string(localeId)
+        ]);
+
+        if (result.error) {
+            Debug.console("DB Error: " + result.errorMessage);
+            return;
+        }
+
+        var executableUsers = result.data; // Lấy mảng dữ liệu từ .data
+
+        for (var i = 0; i < executableUsers.length; i++) {
+            var row = executableUsers[i];
+            
+            // Xử lý email (Nếu rỗng thì giả lập email cho môi trường test)
+            var targetEmail = row.email_address1;
+            if (isBlank(targetEmail)) {
+                targetEmail = row.auth_user_code + "@intra-mart.local";
+            }
+            
+            // Cập nhật tên người nhận thực tế vào mailDetails
+            mailDetails.targetUserName = row.auth_user_name || row.auth_user_code;
+            
+            // Gửi mail với Email đã resolve (kèm fallback)
+            MailUtils.sendNotification(row.auth_user_code, mailConfig.subject, mailDetails, targetEmail);
         }
         
     } catch (e) {

@@ -39,6 +39,7 @@ function getWorkflowList(flowId) {
         else if (nType === "6") pageType = "5";
 
         var item = {
+            flow_link: "", // Placeholder for the icon column to be filled by Client-side JS
             system_matter_id: row.system_matter_id ? String(row.system_matter_id) : "",
             user_data_id: row.user_data_id ? String(row.user_data_id) : "",
             flow_id: row.flow_id ? String(row.flow_id) : "",

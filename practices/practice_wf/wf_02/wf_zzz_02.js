@@ -24,7 +24,8 @@ function init(request) {
             btnSearch: "Search",
             btnApply: "Apply New",
             btnRefresh: "Refresh List",
-            errNoFlow: "zzz Please enter a Flow ID first!"
+            errNoFlow: "zzz Please enter a Flow ID first!",
+            capFlowInfo: "Flow"
         }
     };
 

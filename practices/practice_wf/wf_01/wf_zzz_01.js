@@ -40,7 +40,20 @@ function init(request) {
       infoParallelRules: "Parallel: dev03, dev07, dev08 assigned to Parallel Node",
       msgConfirm: "Confirmation",
       msgError: "Validation Error",
-      msgSuccess: "Success"
+      msgSuccess: "Success",
+      // Validation Messages
+      zzz_err_required_reason: "zzz Please enter the reason for your leave!",
+      zzz_err_maxlength_reason: "zzz Reason is too long (max 200 chars)!",
+      zzz_err_no_secret: "zzz Reasons cannot contain prohibited words like 'secret'!",
+      zzz_err_required_days: "zzz How many days do you need?",
+      zzz_err_numeric_days: "zzz Leave days must be a number!",
+      zzz_err_min_days: "zzz Minimum leave is 0.5 days!",
+      zzz_err_digits_days: "zzz Please enter up to 2 digits and 1 decimal place!",
+      zzz_err_max_thirty: "zzz You cannot apply for more than 30 days at once!",
+      zzz_err_not_negative: "zzz This value cannot be negative!",
+      zzz_err_number_total: "zzz Item total must be a valid number!",
+      zzz_err_min_total: "zzz Item total cannot be less than 0!",
+      zzz_err_max_total: "zzz Item total cannot exceed 1,000,000!"
     }
   };
 
