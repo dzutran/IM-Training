@@ -5,9 +5,9 @@ This folder contains the mandatory rules and initialization procedures for all A
 ## How to use this folder (For Agents)
 
 1.  **Mandatory Start**: At the beginning of every task, read [RULES.md](./RULES.md).
-2.  **Context Check**: Verify the current project state against the documentation in `dzu/docs` and `dzu/research`.
+2.  **Context Check**: Verify the current project state against the documentation in `dzu/knowledge`.
 3.  **Pattern Check**: If implementing new functionality, check `dzu/practices` for established Intra-mart patterns.
-4.  **Reporting**: Always update `dzu/research` if you discover new system behaviors or fix significant architectural issues.
+4.  **Reporting**: Always update `dzu/knowledge/03_research` if you discover new system behaviors or fix significant architectural issues.
 
 ## Folder Structure
 

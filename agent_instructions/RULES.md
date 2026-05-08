@@ -4,9 +4,10 @@ You are an AI agent working on an Intra-mart Accel Platform project. To ensure c
 
 ## 1. Mandatory Research Phase
 Before writing any code or proposing a plan:
-- **[ ]** Read `dzu/docs/coding_rules.md`.
-- **[ ]** Read `dzu/docs/workflow_programming_best_practices.md` (if the task involves workflow).
-- **[ ]** Search `dzu/research/` for any existing troubleshooting reports or architectural findings.
+- **[ ]** Read `dzu/knowledge/01_standards/coding_rules.md`.
+- **[ ]** Read `dzu/knowledge/01_standards/workflow_programming_best_practices.md` (if the task involves workflow).
+- **[ ]** Read `dzu/agent_instructions/INTRA_MART_WF_SKILL.md` for mandatory SQL and Locale standards.
+- **[ ]** Follow `dzu/agent_instructions/AGENT_PROTOCOL.md` for workflow stages and mandatory self-audit.
 - **[ ]** Consult `dzu/practices/` for project-specific patterns.
 - **[ ]** **EXTERNAL SAMPLES**: You may research official patterns at `external/WEB-INF/jssp/src/sample`. **ABSOLUTELY NO EDITING** is allowed in this folder.
 - **[ ]** **NEVER** reinvent a pattern that already exists in practices or official samples.
@@ -22,7 +23,7 @@ Before writing any code or proposing a plan:
 - **SQL**: Use `2waySQL` syntax and bind parameters via `DbParameter`.
 
 ## 3. Documentation Rule
-- If you find a bug or a specific "gotcha" in the Intra-mart platform, you **MUST** create a new research report in `dzu/research/`.
+- If you find a bug or a specific "gotcha" in the Intra-mart platform, you **MUST** create a new research report in `dzu/knowledge/03_research/`.
 - All significant architectural decisions must be documented.
 
 ## 4. Git & Workflow Rule
