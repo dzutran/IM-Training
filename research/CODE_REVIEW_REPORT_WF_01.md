@@ -40,7 +40,10 @@ The `wf_01` module demonstrates a high level of adherence to Intra-mart Accel Pl
 
 ## 3. Areas for Improvement (Minor)
 - **Hardcoded URLs**: In `arrive_process.js`, the `baseUrl` is hardcoded.
-  - *Recommendation*: Fetch the base URL from the system configuration (Public Storage or System Properties) for better environment portability.
+  - *Recommendation*: Fetch the base URL from the system configuration for better environment portability.
+- **Validation Encapsulation**: 
+  - *Status*: ✅ **FIXED**. Custom rules are now encapsulated in `registerCustomRules()` and managed via local `customRules`/`customMessages` objects.
+  - *Result*: Successfully overridden all standard system messages with the `zzz` prefix.
 - **Client Script Isolation**: Currently, the client-side script is inline in the HTML.
   - *Recommendation*: For larger screens, consider using `<imart type="imuiScript">` to load dedicated CSJS files from a public directory (if infrastructure permits).
 

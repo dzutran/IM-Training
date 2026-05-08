@@ -20,22 +20,27 @@ function init(request) {
     leave_days: "",
     status: "",
     item_total: "",
-    // Fallback messages (avoiding MessageManager if it causes issues)
-    msgConfirmTitle: "Confirmation",
-    msgErrorTitle: "Validation Error",
-    msgSuccessTitle: "Success"
+    // UI Messages (Using direct strings for practice, can be replaced by MessageManager later)
+    msg: {
+      title: "Workflow ZZZ 01 Application",
+      capReason: "Leave Reason",
+      capDays: "Leave Days",
+      capTotal: "Item Total",
+      capStatus: "Status",
+      capPageType: "Page Type",
+      capUserDataId: "User Data ID",
+      capFlowId: "Flow ID",
+      capSysInfo: "System Information",
+      btnApply: "Apply",
+      btnTemp: "Temp Save",
+      btnBack: "Back",
+      btnProcess: "Process",
+      msgConfirm: "Confirmation",
+      msgError: "Validation Error",
+      msgSuccess: "Success"
+    }
   };
 
-  // Safe Message Loading
-  try {
-    var confirm = MessageManager.getMessage('CAP.Z.IWP.COMMON.CONFIRM.TITLE');
-    if (confirm) $data.msgConfirmTitle = confirm;
-
-    var error = MessageManager.getMessage('CAP.Z.IWP.COMMON.ERROR.TITLE');
-    if (error) $data.msgErrorTitle = error;
-  } catch (e) {
-    // Silent fallback to default strings
-  }
 
   // Extract auth user code properly
   var authUserCode = request.getParameter("imwAuthUserCode");

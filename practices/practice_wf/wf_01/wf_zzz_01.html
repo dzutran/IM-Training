@@ -1,6 +1,6 @@
 <html>
 <imart type="head">
-  <title>Workflow ZZZ 01</title>
+  <title><imart type="string" value=$data.msg.title /></title>
   <imart type="workflowOpenPageCsjs" />
   <imart type="jsspRpc" name="NodeApi" page="training/dzu/practices/practice_wf/wf_01/api/node_service"
     callback="nodeActionCB" />
@@ -11,28 +11,76 @@
     var pendingPageType = null;
 
     /**
-     * Custom Validation Rules (Standard imuiAddValidationRule API)
+     * Register Custom Validation Rules
      */
-    imuiAddValidationRule('noSecret', function(val, el, param) {
-      if (val === '') return true;
-      return val.toLowerCase().indexOf('secret') === -1;
-    }, 'zzz Reasons cannot contain prohibited words like "secret"!');
+    function registerCustomRules() {
+      imuiAddValidationRule('noSecret', function(val, el, param) {
+        if (val === '') return true;
+        return val.toLowerCase().indexOf('secret') === -1;
+      });
 
-    imuiAddValidationRule('notNegative', function(val, el, param) {
-      if (val === '') return true;
-      return parseFloat(val) >= 0;
-    }, 'zzz This value cannot be negative!');
+      imuiAddValidationRule('notNegative', function(val, el, param) {
+        if (val === '') return true;
+        return parseFloat(val) >= 0;
+      });
 
-    imuiAddValidationRule('maxThirty', function(val, el, param) {
-      if (val === '') return true;
-      return parseFloat(val) <= 30;
-    }, 'zzz You cannot apply for more than 30 days at once!');
+      imuiAddValidationRule('maxThirty', function(val, el, param) {
+        if (val === '') return true;
+        return parseFloat(val) <= 30;
+      });
+    }
 
     /**
      * Standard IMUI Validation Trigger (Client-side)
      */
     function validateStandard() {
-      return imuiValidate('#workflowOpenPageForm', rules, messages);
+      // 1. Define custom rules (Mirroring the validator file for client-side autonomy)
+      var customRules = {
+        'leave_reason': {
+          required: true,
+          maxlength: 200,
+          noSecret: true
+        },
+        'leave_days': {
+          required: true,
+          numeric: true,
+          digits: [2, 1],
+          min: 0.5,
+          maxThirty: true,
+          notNegative: true
+        },
+        'item_total': {
+          number: true,
+          min: 0,
+          max: 1000000,
+          notNegative: true
+        }
+      };
+
+      // 2. Define custom messages to override EVERYTHING
+      var customMessages = {
+        'leave_reason': {
+          'required': 'zzz Please enter the reason for your leave!',
+          'maxlength': 'zzz Reason is too long (max 200 chars)!',
+          'noSecret': 'zzz Reasons cannot contain prohibited words like "secret"!'
+        },
+        'leave_days': {
+          'required': 'zzz How many days do you need?',
+          'numeric': 'zzz Leave days must be a number!',
+          'min': 'zzz Minimum leave is 0.5 days!',
+          'digits': 'zzz Please enter up to 2 digits and 1 decimal place!',
+          'maxThirty': 'zzz You cannot apply for more than 30 days at once!',
+          'notNegative': 'zzz This value cannot be negative!'
+        },
+        'item_total': {
+          'number': 'zzz Item total must be a valid number!',
+          'min': 'zzz Item total cannot be less than 0!',
+          'max': 'zzz Item total cannot exceed 1,000,000!',
+          'notNegative': 'zzz This value cannot be negative!'
+        }
+      };
+
+      return imuiValidate('#workflowOpenPageForm', customRules, customMessages);
     }
 
     /**
@@ -80,8 +128,30 @@
       }
     }
 
+    /**
+     * Light Validation for Temporary Save
+     */
+    function validateTempSave() {
+      var tempRules = {
+        'leave_reason': { maxlength: 200 },
+        'leave_days': { numeric: true, digits: [2, 1], notNegative: true },
+        'item_total': { number: true, max: 1000000, notNegative: true }
+      };
+
+      var tempMessages = {
+        'leave_reason': { 'maxlength': 'zzz Reason is too long even for a draft!' },
+        'leave_days': { 'numeric': 'zzz Must be a number!', 'notNegative': 'zzz No negative days!' },
+        'item_total': { 'number': 'zzz Must be a number!', 'notNegative': 'zzz No negative total!' }
+      };
+
+      return imuiValidate('#workflowOpenPageForm', tempRules, tempMessages);
+    }
+
     $(function () {
-      // Prevent double submission (Standard IM pattern)
+      // 1. Initialize Custom Rules
+      registerCustomRules();
+
+      // 2. Prevent double submission
       imuiDisableOnSubmit('#workflowOpenPageForm');
 
       $('#back').click(function () {
@@ -97,7 +167,7 @@
       });
 
       $('#openPage1').click(function () {
-        // Temp save might bypass some validations, but standard IM allows custom logic
+        if (!validateTempSave()) return false;
         workflowOpenPage('1');
         return false;
       });
@@ -131,20 +201,24 @@
 
   <div class="imui-form-container-wide">
     <div class="imui-chapter-title">
-      <h2>Workflow Application</h2>
+      <h2><imart type="string" value=$data.msg.title /></h2>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <imart type="imuiButton" value=$data.msg.btnBack id="back" name="back" class="imui-medium-button" />
     </div>
 
     <table class="imui-form">
       <tbody>
         <tr>
-          <th class="imui-required"><label>Leave Reason</label></th>
+          <th><label class="imui-required"><imart type="string" value=$data.msg.capReason /></label></th>
           <td>
             <imart type="imuiTextArea" name="leave_reason" value=$data.leave_reason style="width: 400px; height: 100px;"
               placeholder="Enter leave reason..." />
           </td>
         </tr>
         <tr>
-          <th class="imui-required"><label>Leave Days</label></th>
+          <th><label class="imui-required"><imart type="string" value=$data.msg.capDays /></label></th>
           <td>
             <imart type="imuiTextbox" name="leave_days" value=$data.leave_days style="width: 100px;" />
             <span
@@ -156,7 +230,7 @@
           </td>
         </tr>
         <tr>
-          <th><label>Item Total</label></th>
+          <th><label><imart type="string" value=$data.msg.capTotal /></label></th>
           <td>
             <imart type="imuiTextbox" name="item_total" value=$data.item_total style="width: 100px;" />
             <span
@@ -168,7 +242,7 @@
           </td>
         </tr>
         <tr>
-          <th><label>Status</label></th>
+          <th><label><imart type="string" value=$data.msg.capStatus /></label></th>
           <td>
             <imart type="imuiTextbox" value=$data.status readonly class="imui-text-readonly" />
           </td>
@@ -177,25 +251,25 @@
     </table>
 
     <div class="imui-chapter-title" style="margin-top: 20px;">
-      <h2>System Information</h2>
+      <h2><imart type="string" value=$data.msg.capSysInfo /></h2>
     </div>
 
     <table class="imui-form">
       <tbody>
         <tr>
-          <th><label>Page Type</label></th>
+          <th><label><imart type="string" value=$data.msg.capPageType /></label></th>
           <td>
             <imart type="imuiTextbox" value=$data.imwPageType readonly class="imui-text-readonly" />
           </td>
         </tr>
         <tr>
-          <th><label>User Data ID</label></th>
+          <th><label><imart type="string" value=$data.msg.capUserDataId /></label></th>
           <td>
             <imart type="imuiTextbox" value=$data.imwUserDataId readonly class="imui-text-readonly" />
           </td>
         </tr>
         <tr>
-          <th><label>Flow ID</label></th>
+          <th><label><imart type="string" value=$data.msg.capFlowId /></label></th>
           <td>
             <imart type="imuiTextbox" value=$data.imwFlowId readonly class="imui-text-readonly" />
           </td>
@@ -205,21 +279,21 @@
 
     <div class="imui-operation-parts">
       <imart type="decision" case="0" value=$data.imwPageType>
-        <imart type="imuiButton" value="Apply" id="openPage0" name="openPage0" class="imui-large-button" />
-        <imart type="imuiButton" value="Temp Save" id="openPage1" name="openPage1" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnApply id="openPage0" name="openPage0" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnTemp id="openPage1" name="openPage1" class="imui-large-button" />
       </imart>
       <imart type="decision" case="1" value=$data.imwPageType>
-        <imart type="imuiButton" value="Apply" id="openPage0" name="openPage0" class="imui-large-button" />
-        <imart type="imuiButton" value="Temp Save" id="openPage1" name="openPage1" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnApply id="openPage0" name="openPage0" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnTemp id="openPage1" name="openPage1" class="imui-large-button" />
       </imart>
       <imart type="decision" case="2" value=$data.imwPageType>
-        <imart type="imuiButton" value="Apply (Draft)" id="openPage2" name="openPage2" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnApply id="openPage2" name="openPage2" class="imui-large-button" />
       </imart>
       <imart type="decision" case="3" value=$data.imwPageType>
-        <imart type="imuiButton" value="Re-apply" id="openPage3" name="openPage3" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnApply id="openPage3" name="openPage3" class="imui-large-button" />
       </imart>
       <imart type="decision" case="4" value=$data.imwPageType>
-        <imart type="imuiButton" value="Process" id="openPage4" name="openPage4" class="imui-large-button" />
+        <imart type="imuiButton" value=$data.msg.btnProcess id="openPage4" name="openPage4" class="imui-large-button" />
       </imart>
     </div>
   </div>

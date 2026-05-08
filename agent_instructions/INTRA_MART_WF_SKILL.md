@@ -17,6 +17,8 @@ Before any implementation, the agent MUST synchronize with these sources:
 - **Error Messages**: MUST be prefixed with `zzz` for project consistency (e.g., `zzz This field is required`).
 - **JSSP Pairing**: HTML and Server JS MUST stay in the same directory.
 - **Server-side**: Use `imuiValidationRule` tag pointing to `.../validator/screen_name#rules`.
+- **Advanced Override Pattern**: To achieve total control over error messages (including standard rules like `required`), define `customRules` and `customMessages` objects locally in the JSSP script and pass them to `imuiValidate(formId, customRules, customMessages)`.
+- **Action-Specific Validation**: Create different validation functions (e.g., `validateStandard`, `validateTempSave`) with different rule sets for different workflow buttons.
 
 ---
 
